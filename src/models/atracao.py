@@ -5,3 +5,4 @@ class Atracao:
         self.idade_minima = idade_minima
         self.horario = horario
         self.aceita_prioridade = aceita_prioridade
+        self.fila_virtual = None
