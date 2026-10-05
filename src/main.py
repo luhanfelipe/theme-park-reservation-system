@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from src.services.parque_service import ParqueService
+from src.gui.tela_visitante import TelaVisitante
 
 class AppParque(ctk.CTk):
     """Representa a janela principal do sistema do parque."""
@@ -48,8 +49,9 @@ class AppParque(ctk.CTk):
 
     def abrir_tela_visitante(self):
         self.limpar_frame_principal()
-        ctk.CTkLabel(self.frame_principal, text="Tela de Cadastro de Visitantes (Em breve)", font=("Arial", 18)).pack(pady=20)
-        # Aqui depois colocaremos os campos de texto (Nome, CPF, etc.) e o botão Salvar
+
+        tela = TelaVisitante(self.frame_principal, self.servico)
+        tela.pack(fill="both", expand=True) # Faz a tela ocupar todo o espaço
 
     def abrir_tela_atracao(self):
         self.limpar_frame_principal()
