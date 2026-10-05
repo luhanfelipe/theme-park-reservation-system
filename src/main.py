@@ -2,6 +2,7 @@ import customtkinter as ctk
 from src.services.parque_service import ParqueService
 from src.gui.tela_visitante import TelaVisitante
 from src.gui.tela_atracao import TelaAtracao
+from src.gui.tela_fila import TelaFila
 
 class AppParque(ctk.CTk):
     """Representa a janela principal do sistema do parque."""
@@ -61,7 +62,8 @@ class AppParque(ctk.CTk):
         
     def abrir_tela_fila(self):
         self.limpar_frame_principal()
-        ctk.CTkLabel(self.frame_principal, text="Tela da Fila Virtual (Em breve)", font=("Arial", 18)).pack(pady=20)
+        tela = TelaFila(self.frame_principal, self.servico)
+        tela.pack(fill="both", expand=True)
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("Dark") # Pode ser "Light" ou "System"
