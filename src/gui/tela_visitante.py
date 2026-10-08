@@ -1,51 +1,53 @@
 import customtkinter as ctk
 
 class TelaVisitante(ctk.CTkFrame):
-    def __init__(self, master, servico):
+    def __init__(self, master, servico, comando_voltar):
         super().__init__(master)
         
         # O "master" é o frame_principal lá do main.py
         # O "servico" é o ParqueService que vai salvar os dados nas Listas Encadeadas
         self.servico = servico 
 
+        self.btn_voltar = ctk.CTkButton(self, text="⬅ Voltar", width=70, fg_color="transparent", border_width=1, command=comando_voltar)
+        self.btn_voltar.place(x=15, y=15)
+
         # --- TÍTULO DA TELA ---
         self.lbl_titulo = ctk.CTkLabel(self, text="Cadastro de Visitantes", font=("Arial", 20, "bold"))
         self.lbl_titulo.pack(pady=10)
 
+
         # --- REQUISITO: FORMULÁRIO (CREATE) ---
         self.frame_form = ctk.CTkFrame(self)
-        self.frame_form.pack(pady=10, padx=20, fill="x")
+        self.frame_form.pack(pady=20, padx=20, anchor="center")
 
-        # Entradas de Texto (Campos exigidos no modelo)
+        ### Campos de entrada para os dados do visitante
         self.entry_nome = ctk.CTkEntry(self.frame_form, placeholder_text="Nome do Visitante", width=200)
-        self.entry_nome.grid(row=0, column=0, padx=10, pady=10)
+        self.entry_nome.grid(row=0, column=0, padx=15, pady=10)
 
         self.entry_idade = ctk.CTkEntry(self.frame_form, placeholder_text="Idade", width=200)
-        self.entry_idade.grid(row=0, column=1, padx=10, pady=10)
+        self.entry_idade.grid(row=0, column=1, padx=15, pady=10)
 
         self.entry_cpf = ctk.CTkEntry(self.frame_form, placeholder_text="CPF (só números)", width=200)
-        self.entry_cpf.grid(row=1, column=0, padx=10, pady=10)
-        self.entry_cpf.bind("<KeyRelease>", self.limitar_cpf) # Chama a função ao digitar
+        self.entry_cpf.grid(row=1, column=0, padx=15, pady=10)
+        self.entry_cpf.bind("<KeyRelease>", self.limitar_cpf)
 
-        self.entry_data = ctk.CTkEntry(self.frame_form, placeholder_text="Data de Nasc. (dd/mm/aaaa)", width=200)
-        self.entry_data.grid(row=1, column=1, padx=10, pady=10)
+        self.entry_data = ctk.CTkEntry(self.frame_form, placeholder_text="Data de Nasc. (ddmmaaaa)", width=200)
+        self.entry_data.grid(row=1, column=1, padx=15, pady=10)
         self.entry_data.bind("<KeyRelease>", self.limitar_data)
 
         self.entry_email = ctk.CTkEntry(self.frame_form, placeholder_text="E-mail", width=200)
-        self.entry_email.grid(row=2, column=0, padx=10, pady=10)
+        self.entry_email.grid(row=2, column=0, padx=15, pady=10)
 
-        # Menu suspenso (ComboBox) para o Tipo de Passe
-        self.combo_passe = ctk.CTkComboBox(self.frame_form, values=["Normal", "VIP", "Passe Anual"], width=200)
-        self.combo_passe.grid(row=2, column=1, padx=10, pady=10)
-        self.combo_passe.set("Normal") # Valor padrão ao abrir a tela
+        self.combo_passe = ctk.CTkComboBox(self.frame_form, values=["Normal", "VIP"], width=200)
+        self.combo_passe.grid(row=2, column=1, padx=15, pady=10)
+        self.combo_passe.set("Normal")
 
-        # Botão de Salvar
         self.btn_salvar = ctk.CTkButton(self.frame_form, text="Salvar Visitante", command=self.salvar_visitante)
-        self.btn_salvar.grid(row=3, column=0, columnspan=2, pady=15)
+        self.btn_salvar.grid(row=3, column=0, columnspan=2, pady=20)
 
-        # Label para exibir mensagens de Sucesso/Erro
         self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", text_color="green")
-        self.lbl_mensagem.grid(row=4, column=0, columnspan=2)
+        self.lbl_mensagem.grid(row=4, column=0, columnspan=2, pady=(0, 10))
+
 
         # --- REQUISITO: VISUALIZAÇÃO DOS DADOS (READ) ---
         self.lbl_lista = ctk.CTkLabel(self, text="Visitantes Cadastrados:", font=("Arial", 16, "bold"))

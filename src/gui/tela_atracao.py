@@ -1,9 +1,12 @@
 import customtkinter as ctk
 
 class TelaAtracao(ctk.CTkFrame):
-    def __init__(self, master, servico):
+    def __init__(self, master, servico, comando_voltar):
         super().__init__(master)
         self.servico = servico
+
+        self.btn_voltar = ctk.CTkButton(self, text="⬅ Voltar", width=70, fg_color="transparent", border_width=1, command=comando_voltar)
+        self.btn_voltar.place(x=15, y=15)
 
         # --- TÍTULO ---
         self.lbl_titulo = ctk.CTkLabel(self, text="Cadastro de Atrações", font=("Arial", 20, "bold"))
@@ -11,32 +14,33 @@ class TelaAtracao(ctk.CTkFrame):
 
         # --- FORMULÁRIO (CREATE) ---
         self.frame_form = ctk.CTkFrame(self)
-        self.frame_form.pack(pady=10, padx=20, fill="x")
+        self.frame_form.pack(pady=20, padx=20, anchor="center")
 
         self.entry_nome = ctk.CTkEntry(self.frame_form, placeholder_text="Nome da Atração", width=200)
-        self.entry_nome.grid(row=0, column=0, padx=10, pady=10)
+        self.entry_nome.grid(row=0, column=0, padx=15, pady=10)
 
         self.entry_capacidade = ctk.CTkEntry(self.frame_form, placeholder_text="Capacidade (ex: 20)", width=200)
-        self.entry_capacidade.grid(row=0, column=1, padx=10, pady=10)
+        self.entry_capacidade.grid(row=0, column=1, padx=15, pady=10)
 
         self.entry_idade = ctk.CTkEntry(self.frame_form, placeholder_text="Idade Mínima", width=200)
-        self.entry_idade.grid(row=1, column=0, padx=10, pady=10)
+        self.entry_idade.grid(row=1, column=0, padx=15, pady=10)
 
         self.entry_horario = ctk.CTkEntry(self.frame_form, placeholder_text="Horário (ex: 10h-18h)", width=200)
-        self.entry_horario.grid(row=1, column=1, padx=10, pady=10)
+        self.entry_horario.grid(row=1, column=1, padx=15, pady=10)
 
         self.lbl_prioridade = ctk.CTkLabel(self.frame_form, text="Aceita Passe VIP?")
-        self.lbl_prioridade.grid(row=2, column=0, padx=10, pady=5, sticky="e")
+        self.lbl_prioridade.grid(row=2, column=0, padx=15, pady=5, sticky="e")
 
         self.combo_prioridade = ctk.CTkComboBox(self.frame_form, values=["Sim", "Não"], width=100)
-        self.combo_prioridade.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+        self.combo_prioridade.grid(row=2, column=1, padx=15, pady=5, sticky="w")
         self.combo_prioridade.set("Sim")
 
         self.btn_salvar = ctk.CTkButton(self.frame_form, text="Salvar Atração", command=self.salvar_atracao)
-        self.btn_salvar.grid(row=3, column=0, columnspan=2, pady=15)
+        self.btn_salvar.grid(row=3, column=0, columnspan=2, pady=20)
 
         self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", text_color="green")
         self.lbl_mensagem.grid(row=4, column=0, columnspan=2)
+
 
         # --- VISUALIZAÇÃO (READ) ---
         self.lbl_lista = ctk.CTkLabel(self, text="Atrações Cadastradas:", font=("Arial", 16, "bold"))

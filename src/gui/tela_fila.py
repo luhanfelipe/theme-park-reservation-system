@@ -1,9 +1,12 @@
 import customtkinter as ctk
 
 class TelaFila(ctk.CTkFrame):
-    def __init__(self, master, servico):
+    def __init__(self, master, servico, comando_voltar):
         super().__init__(master)
         self.servico = servico
+
+        self.btn_voltar = ctk.CTkButton(self, text="⬅ Voltar", width=70, fg_color="transparent", border_width=1, command=comando_voltar)
+        self.btn_voltar.place(x=15, y=15)
 
         # --- TÍTULO ---
         self.lbl_titulo = ctk.CTkLabel(self, text="Fila Virtual - Entrada", font=("Arial", 20, "bold"))
@@ -11,18 +14,18 @@ class TelaFila(ctk.CTkFrame):
 
         # --- FORMULÁRIO ---
         self.frame_form = ctk.CTkFrame(self)
-        self.frame_form.pack(pady=10, padx=20, fill="x")
+        self.frame_form.pack(pady=20, padx=20, anchor="center")
 
         self.entry_cpf = ctk.CTkEntry(self.frame_form, placeholder_text="CPF do Visitante", width=200)
-        self.entry_cpf.grid(row=0, column=0, padx=10, pady=10)
+        self.entry_cpf.grid(row=0, column=0, padx=15, pady=10)
         self.entry_cpf.bind("<KeyRelease>", self.limitar_cpf)
 
         # NOVIDADE: Adicionamos o "command=self.atualizar_lista_fila" para atualizar a tela se você mudar a atração!
         self.combo_atracao = ctk.CTkComboBox(self.frame_form, values=["Nenhuma atração cadastrada"], width=220, command=self.atualizar_lista_fila)
-        self.combo_atracao.grid(row=0, column=1, padx=10, pady=10)
+        self.combo_atracao.grid(row=0, column=1, padx=15, pady=10)
 
         self.btn_adicionar = ctk.CTkButton(self.frame_form, text="Adicionar à Fila", command=self.entrar_na_fila)
-        self.btn_adicionar.grid(row=1, column=0, columnspan=2, pady=15)
+        self.btn_adicionar.grid(row=1, column=0, columnspan=2, pady=20)
 
         self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", text_color="green")
         self.lbl_mensagem.grid(row=2, column=0, columnspan=2)
@@ -34,7 +37,6 @@ class TelaFila(ctk.CTkFrame):
         self.caixa_texto_lista = ctk.CTkTextbox(self, height=200)
         self.caixa_texto_lista.pack(pady=10, padx=20, fill="both", expand=True)
         self.caixa_texto_lista.configure(state="disabled")
-        # -------------------------------------------------------
 
         self.carregar_atracoes()
 

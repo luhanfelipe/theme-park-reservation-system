@@ -33,7 +33,7 @@ class TelaLogin(ctk.CTkFrame):
         senha = self.entry_senha.get()
 
         # Validando com um usuário fixo de testes
-        if usuario == "admin" and senha == "1234":
+        if usuario == "root" and senha == "root":
             self.lbl_mensagem.configure(text="Acesso liberado! Entrando...", text_color="green")
             # Usa o método after para esperar meio segundo (500ms) antes de mudar de tela
             self.after(500, self.on_login_sucesso)
