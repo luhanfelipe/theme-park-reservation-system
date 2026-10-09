@@ -1,3 +1,4 @@
+
 from src.structures.no import No
 
 
@@ -27,6 +28,19 @@ class ListaEncadeada:
         while atual is not None:
             if atual.dado == dado:
                 return atual.dado
+
+            atual = atual.proximo
+
+        return None
+
+    def buscar_por(self, atributo, valor):
+        atual = self.inicio
+
+        while atual is not None:
+            dado = atual.dado
+
+            if getattr(dado, atributo, None) == valor:
+                return dado
 
             atual = atual.proximo
 
