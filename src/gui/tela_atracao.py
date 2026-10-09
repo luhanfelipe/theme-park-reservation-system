@@ -41,14 +41,13 @@ class TelaAtracao(ctk.CTkFrame):
         self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", text_color="green")
         self.lbl_mensagem.grid(row=4, column=0, columnspan=2)
 
-
-        # --- VISUALIZAÇÃO (READ) ---
+        # --- LISTAGEM DE ATRAÇÕES (READ) ---
         self.lbl_lista = ctk.CTkLabel(self, text="Atrações Cadastradas:", font=("Arial", 16, "bold"))
         self.lbl_lista.pack(pady=(20, 0))
 
-        self.caixa_texto_lista = ctk.CTkTextbox(self, height=200)
-        self.caixa_texto_lista.pack(pady=10, padx=20, fill="both", expand=True)
-        self.caixa_texto_lista.configure(state="disabled")
+        # Substituímos a velha caixa de texto pelo ScrollableFrame transparente!
+        self.frame_lista = ctk.CTkScrollableFrame(self, height=250, fg_color="transparent")
+        self.frame_lista.pack(pady=10, padx=20, fill="both", expand=True)
 
         self.atualizar_lista()
 
@@ -90,17 +89,44 @@ class TelaAtracao(ctk.CTkFrame):
         self.atualizar_lista()
 
     def atualizar_lista(self):
-        self.caixa_texto_lista.configure(state="normal")
-        self.caixa_texto_lista.delete("1.0", "end")
+        # Limpa os cartões antigos da tela
+        for widget in self.frame_lista.winfo_children():
+            widget.destroy()
 
         atracoes = self.servico.listar_atracoes()
-        
+
         if not atracoes:
-            self.caixa_texto_lista.insert("end", "Nenhuma atração cadastrada ainda.\n")
-        else:
-            for a in atracoes:
-                priori_txt = "Sim" if a.aceita_prioridade else "Não"
-                linha = f"{a.nome} | Capacidade: {a.capacidade} | Idade Mínima: {a.idade_minima} | Horário: {a.horario} | Aceita VIP: {priori_txt}\n"
-                self.caixa_texto_lista.insert("end", linha)
-        
-        self.caixa_texto_lista.configure(state="disabled")
+            lbl_vazio = ctk.CTkLabel(self.frame_lista, text="Nenhuma atração cadastrada ainda.", font=("Arial", 16, "italic"), text_color="gray")
+            lbl_vazio.pack(pady=30)
+            return
+
+        for a in atracoes:
+            # Cria o fundo do cartão
+            card = ctk.CTkFrame(self.frame_lista, corner_radius=10, border_width=1, border_color="#3a3a3a")
+            card.pack(pady=5, padx=10, fill="x")
+
+            # --- LINHA SUPERIOR (Nome da Atração e Etiqueta de Prioridade) ---
+            frame_topo = ctk.CTkFrame(card, fg_color="transparent")
+            frame_topo.pack(fill="x", padx=15, pady=(10, 0)) # Margem no topo
+
+            # Nome da atração num tom azulado para diferenciar das pessoas
+            lbl_nome = ctk.CTkLabel(frame_topo, text=a.nome, font=("Arial", 16, "bold"), text_color="#1f6aa5")
+            lbl_nome.pack(side="left")
+
+            # Etiqueta visual se aceita fura-fila ou não
+            if a.aceita_prioridade:
+                lbl_prio = ctk.CTkLabel(frame_topo, text="⚡ VIP / Anual", font=("Arial", 14, "bold"), text_color="#ffd700")
+            else:
+                lbl_prio = ctk.CTkLabel(frame_topo, text="🚶 Fila Comum", font=("Arial", 12), text_color="gray")
+            lbl_prio.pack(side="right")
+
+            # --- LINHA INFERIOR (Dados operacionais do brinquedo) ---
+            frame_base = ctk.CTkFrame(card, fg_color="transparent")
+            frame_base.pack(fill="x", padx=15, pady=(5, 10)) # Margem na base
+            
+            # Formatamos os detalhes da atração. 
+            # (Se o seu modelo 'Atracao' tiver mais atributos como 'duracao', basta adicionar aqui!)
+            info_texto = f"Capacidade: {a.capacidade} pessoas  |  Idade Mínima: {a.idade_minima} anos | Horário: {a.horario}"
+            
+            lbl_info = ctk.CTkLabel(frame_base, text=info_texto, font=("Arial", 13), text_color="#a0a0a0")
+            lbl_info.pack(side="left")

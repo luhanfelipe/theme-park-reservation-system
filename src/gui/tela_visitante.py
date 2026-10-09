@@ -48,15 +48,14 @@ class TelaVisitante(ctk.CTkFrame):
         self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", text_color="green")
         self.lbl_mensagem.grid(row=4, column=0, columnspan=2, pady=(0, 10))
 
-
-        # --- REQUISITO: VISUALIZAÇÃO DOS DADOS (READ) ---
+        # --- LISTAGEM DE VISITANTES
         self.lbl_lista = ctk.CTkLabel(self, text="Visitantes Cadastrados:", font=("Arial", 16, "bold"))
         self.lbl_lista.pack(pady=(20, 0))
 
-        # Uma caixa de texto grande para listar todos os cadastros
-        self.caixa_texto_lista = ctk.CTkTextbox(self, height=200)
-        self.caixa_texto_lista.pack(pady=10, padx=20, fill="both", expand=True)
-        self.caixa_texto_lista.configure(state="disabled") # Bloqueia para o usuário não digitar dentro
+        self.frame_lista = ctk.CTkScrollableFrame(self, height=250, fg_color="transparent")
+        self.frame_lista.pack(pady=10, padx=20, fill="both", expand=True)
+
+        self.atualizar_lista()
 
         # Ao abrir a tela, já carrega a lista
         self.atualizar_lista()
@@ -114,20 +113,44 @@ class TelaVisitante(ctk.CTkFrame):
         self.atualizar_lista()
 
     def atualizar_lista(self):
-        # Habilita a caixa de texto temporariamente para escrevermos nela
-        self.caixa_texto_lista.configure(state="normal")
-        self.caixa_texto_lista.delete("1.0", "end") # Limpa o texto antigo
+            # Limpa os cartões antigos da tela
+            for widget in self.frame_lista.winfo_children():
+                widget.destroy()
 
-        # Pede ao serviço a lista atualizada
-        visitantes = self.servico.listar_visitantes()
-        
-        if not visitantes:
-            self.caixa_texto_lista.insert("end", "Nenhum visitante cadastrado ainda.\n")
-        else:
+            visitantes = self.servico.listar_visitantes()
+
+            if not visitantes:
+                lbl_vazio = ctk.CTkLabel(self.frame_lista, text="Nenhum visitante cadastrado ainda.", font=("Arial", 16, "italic"), text_color="gray")
+                lbl_vazio.pack(pady=30)
+                return
+
             for v in visitantes:
-                linha = f"Nome: {v.nome} | CPF: {v.cpf} | Nasc: {v.data_nascimento} | Idade: {v.idade} | Passe: {v.tipo_passe}\n"
-                self.caixa_texto_lista.insert("end", linha)
-        
-        # Bloqueia a caixa novamente
-        self.caixa_texto_lista.configure(state="disabled")
-        
+                # Cria o fundo do cartão
+                card = ctk.CTkFrame(self.frame_lista, corner_radius=10, border_width=1, border_color="#3a3a3a")
+                card.pack(pady=5, padx=10, fill="x")
+
+                # --- LINHA SUPERIOR (Nome e Etiqueta do Passe) ---
+                frame_topo = ctk.CTkFrame(card, fg_color="transparent")
+                frame_topo.pack(fill="x", padx=15, pady=(10, 0)) # Margem em cima
+
+                lbl_nome = ctk.CTkLabel(frame_topo, text=v.nome, font=("Arial", 16, "bold"), text_color="#1e90ff")
+                lbl_nome.pack(side="left")
+
+                tipo_passe = str(v.tipo_passe).upper()
+                if "VIP" in tipo_passe:
+                    lbl_passe = ctk.CTkLabel(frame_topo, text="★ VIP", font=("Arial", 14, "bold"), text_color="#ffd700")
+                elif "ANUAL" in tipo_passe:
+                    lbl_passe = ctk.CTkLabel(frame_topo, text="🎟️ ANUAL", font=("Arial", 14, "bold"), text_color="#32cd32")
+                else:
+                    lbl_passe = ctk.CTkLabel(frame_topo, text="Normal", font=("Arial", 12), text_color="gray")
+                lbl_passe.pack(side="right")
+
+                # --- LINHA INFERIOR (Todos os dados completos do formulário) ---
+                frame_base = ctk.CTkFrame(card, fg_color="transparent")
+                frame_base.pack(fill="x", padx=15, pady=(5, 10)) # Margem em baixo
+                
+                # Junta todas as informações numa string formatada com separadores
+                info_texto = f"CPF: {v.cpf}  |  Idade: {v.idade} anos  |  Nasc: {v.data_nascimento}  |  E-mail: {v.email}"
+                
+                lbl_info = ctk.CTkLabel(frame_base, text=info_texto, font=("Arial", 13), text_color="#a0a0a0")
+                lbl_info.pack(side="left")
