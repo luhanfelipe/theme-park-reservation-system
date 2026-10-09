@@ -1,56 +1,56 @@
-from src.structures.no import No
+class No:
+    def __init__(self, visitante):
+        self.visitante = visitante
+        self.proximo = None
 
 class FilaPrioridade:
     def __init__(self):
         self.inicio = None
-        self.tamanho = 0
 
-    def enfileirar(self, visitante, atracao_aceita_prioridade):
+    def _obter_peso(self, visitante):
+        # Transforma o passe em maiúsculo para evitar erros de digitação (ex: "Vip", "vip", "VIP")
+        passe = str(visitante.tipo_passe).upper() 
+        
+        if "VIP" in passe:
+            return 3
+        elif "ANUAL" in passe:
+            return 2
+        else:
+            return 1  # Se não for VIP nem Anual, é Normal
+
+    def enfileirar(self, visitante, atracao_aceita_prioridade=True):
         novo_no = No(visitante)
 
-        # Se a fila está vazia, apenas entra
-        if self.inicio is None:
+        # Se a atração NÃO aceita prioridade, todo mundo é tratado como Peso 1 (Normal)
+        peso_novo = self._obter_peso(visitante) if atracao_aceita_prioridade else 1
+
+        # CASO 1: A fila está vazia ou o novo visitante tem MAIS prioridade que o 1º da fila
+        if self.inicio is None or peso_novo > self._obter_peso(self.inicio.visitante):
+            novo_no.proximo = self.inicio
             self.inicio = novo_no
-        else:
-            # Se a atração aceita prioridade E o novo visitante é VIP/Especial E o primeiro da fila é Normal
-            if atracao_aceita_prioridade and visitante.tipo_passe != "Normal" and self.inicio.dado.tipo_passe == "Normal":
-                # VIP fura a fila e vira o primeiro
-                novo_no.proximo = self.inicio
-                self.inicio = novo_no
+            return
+
+        # CASO 2: Procurar a posição correta no meio ou fim da fila
+        # O novo visitante vai andando para trás até achar alguém com prioridade MENOR que a dele
+        atual = self.inicio
+        while atual.proximo is not None:
+            peso_proximo = self._obter_peso(atual.proximo.visitante) if atracao_aceita_prioridade else 1
+            
+            # Se o próximo da fila tem prioridade maior ou IGUAL, nós continuamos andando para trás
+            if peso_proximo >= peso_novo:
+                atual = atual.proximo
             else:
-                # Caso contrário, percorre a fila para achar o lugar certo
-                atual = self.inicio
-                
-                # Continua andando na fila enquanto:
-                # 1. Existir um próximo
-                # 2. NÃO acontecer a situação do VIP achar um "Normal" na frente dele (se a atração aceitar prioridade)
-                while atual.proximo is not None:
-                    proximo_visitante = atual.proximo.dado
-                    if atracao_aceita_prioridade and visitante.tipo_passe != "Normal" and proximo_visitante.tipo_passe == "Normal":
-                        break # Achou o ponto onde o VIP deve furar a fila
-                    atual = atual.proximo
-                
-                # Insere na posição encontrada
-                novo_no.proximo = atual.proximo
-                atual.proximo = novo_no
+                break # Achamos o ponto de inserção!
 
-        self.tamanho += 1
-
-    def desenfileirar(self):
-        # Remove a pessoa do início da fila para entrar no brinquedo
-        if self.inicio is None:
-            return None
-        
-        atendido = self.inicio.dado
-        self.inicio = self.inicio.proximo
-        self.tamanho -= 1
-        return atendido
+        # Insere o novo nó conectando os ponteiros
+        novo_no.proximo = atual.proximo
+        atual.proximo = novo_no
 
     def listar_fila(self):
-        # Apenas para facilitar a visualização da fila
+        # Retorna uma lista normal do Python apenas para a tela conseguir ler e desenhar
         elementos = []
         atual = self.inicio
         while atual is not None:
-            elementos.append(f"{atual.dado.nome} ({atual.dado.tipo_passe})")
+            elementos.append(atual.visitante)
             atual = atual.proximo
         return elementos

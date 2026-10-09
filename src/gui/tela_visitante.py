@@ -38,7 +38,7 @@ class TelaVisitante(ctk.CTkFrame):
         self.entry_email = ctk.CTkEntry(self.frame_form, placeholder_text="E-mail", width=200)
         self.entry_email.grid(row=2, column=0, padx=15, pady=10)
 
-        self.combo_passe = ctk.CTkComboBox(self.frame_form, values=["Normal", "VIP"], width=200)
+        self.combo_passe = ctk.CTkComboBox(self.frame_form, values=["Normal", "VIP", "Passe Anual"], width=200)
         self.combo_passe.grid(row=2, column=1, padx=15, pady=10)
         self.combo_passe.set("Normal")
 

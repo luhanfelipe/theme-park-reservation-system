@@ -34,9 +34,8 @@ class TelaFila(ctk.CTkFrame):
         self.lbl_lista = ctk.CTkLabel(self, text="Fila Atual da Atração:", font=("Arial", 16, "bold"))
         self.lbl_lista.pack(pady=(20, 0))
 
-        self.caixa_texto_lista = ctk.CTkTextbox(self, height=200)
-        self.caixa_texto_lista.pack(pady=10, padx=20, fill="both", expand=True)
-        self.caixa_texto_lista.configure(state="disabled")
+        self.frame_lista = ctk.CTkScrollableFrame(self, height=250, fg_color="transparent")
+        self.frame_lista.pack(pady=10, padx=20, fill="both", expand=True)
 
         self.carregar_atracoes()
 
@@ -78,28 +77,47 @@ class TelaFila(ctk.CTkFrame):
             self.entry_cpf.delete(0, 'end')
             self.atualizar_lista_fila() # NOVIDADE: Atualiza a listagem assim que a pessoa entra com sucesso!
 
-    # --- NOVIDADE: FUNÇÃO QUE BUSCA A FILA E ESCREVE NA TELA ---
     def atualizar_lista_fila(self, escolha=None):
         nome_atracao = self.combo_atracao.get()
         
-        self.caixa_texto_lista.configure(state="normal")
-        self.caixa_texto_lista.delete("1.0", "end")
+        # Limpa os cartões antigos
+        for widget in self.frame_lista.winfo_children():
+            widget.destroy()
 
         if nome_atracao == "Nenhuma atração cadastrada":
-            self.caixa_texto_lista.configure(state="disabled")
             return
 
         atracoes = self.servico.listar_atracoes()
         for a in atracoes:
             if a.nome == nome_atracao:
-                # Pega a lista do seu arquivo fila_prioridade.py
                 fila_atual = a.fila_virtual.listar_fila()
                 
                 if not fila_atual:
-                    self.caixa_texto_lista.insert("end", "A fila está vazia no momento.\n")
+                    lbl_vazio = ctk.CTkLabel(self.frame_lista, text="A fila está vazia no momento. Pode entrar!", font=("Arial", 16, "italic"), text_color="gray")
+                    lbl_vazio.pack(pady=30)
                 else:
                     for posicao, pessoa in enumerate(fila_atual, 1):
-                        self.caixa_texto_lista.insert("end", f"{posicao}º lugar: {pessoa}\n")
+                        card = ctk.CTkFrame(self.frame_lista, corner_radius=10, border_width=1, border_color="#3a3a3a")
+                        card.pack(pady=5, padx=10, fill="x")
+                        
+                        lbl_pos = ctk.CTkLabel(card, text=f"{posicao}º", font=("Arial", 18, "bold"), text_color="#1f6aa5", width=40)
+                        lbl_pos.pack(side="left", padx=15, pady=10)
+                        
+                        # --- A MELHORIA: Lê os dados DIRETOS do objeto! ---
+                        nome_visitante = pessoa.nome
+                        tipo_passe_visitante = str(pessoa.tipo_passe).upper()
+                        
+                        lbl_nome = ctk.CTkLabel(card, text=nome_visitante, font=("Arial", 16))
+                        lbl_nome.pack(side="left", padx=10, pady=10)
+                        
+                        # Avalia o passe diretamente da variável
+                        if "VIP" in tipo_passe_visitante:
+                            lbl_vip = ctk.CTkLabel(card, text="★ VIP", font=("Arial", 14, "bold"), text_color="#ffd700")
+                            lbl_vip.pack(side="right", padx=20, pady=10)
+                        elif "ANUAL" in tipo_passe_visitante:
+                            lbl_anual = ctk.CTkLabel(card, text="🎟️ ANUAL", font=("Arial", 14, "bold"), text_color="#32cd32")
+                            lbl_anual.pack(side="right", padx=20, pady=10)
+                        else:
+                            lbl_normal = ctk.CTkLabel(card, text="Normal", font=("Arial", 12), text_color="gray")
+                            lbl_normal.pack(side="right", padx=20, pady=10)
                 break
-
-        self.caixa_texto_lista.configure(state="disabled")
