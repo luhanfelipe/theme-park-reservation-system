@@ -5,49 +5,92 @@ class TelaAtracao(ctk.CTkFrame):
         super().__init__(master)
         self.servico = servico
 
-        self.btn_voltar = ctk.CTkButton(self, text="⬅ Voltar", width=70, fg_color="transparent", border_width=1, command=comando_voltar)
-        self.btn_voltar.place(x=15, y=15)
+        # --- BOTÃO VOLTAR ---
+        self.btn_voltar = ctk.CTkButton(
+            self, 
+            text="⬅ Voltar", 
+            width=80, 
+            height=32,
+            fg_color="transparent", 
+            border_width=1, 
+            border_color="#4b5563",
+            hover_color="#374151",
+            command=comando_voltar
+        )
+        self.btn_voltar.place(x=20, y=15)
 
-        # --- TÍTULO ---
-        self.lbl_titulo = ctk.CTkLabel(self, text="Cadastro de Atrações", font=("Arial", 20, "bold"))
-        self.lbl_titulo.pack(pady=10)
+        # --- TÍTULO DA TELA ---
+        self.lbl_titulo = ctk.CTkLabel(
+            self, 
+            text=" ✦ Cadastro de Atrações", 
+            font=ctk.CTkFont(size=22, weight="bold")
+        )
+        self.lbl_titulo.pack(pady=(15, 10))
 
-        # --- FORMULÁRIO (CREATE) ---
-        self.frame_form = ctk.CTkFrame(self)
-        self.frame_form.pack(pady=20, padx=20, anchor="center")
+        # --- FORMULÁRIO DE CADASTRO ---
+        self.frame_form = ctk.CTkFrame(self, corner_radius=12, border_width=1, border_color="#374151")
+        self.frame_form.pack(pady=10, padx=20, anchor="center")
 
-        self.entry_nome = ctk.CTkEntry(self.frame_form, placeholder_text="Nome da Atração", width=200)
-        self.entry_nome.grid(row=0, column=0, padx=15, pady=10)
+        # --- LINHA 0: Nome e Capacidade ---
+        # Campo Nome da Atração
+        self.lbl_nome = ctk.CTkLabel(self.frame_form, text="Nome da Atração:", font=ctk.CTkFont(size=12, weight="bold"))
+        self.lbl_nome.grid(row=0, column=0, sticky="w", padx=15, pady=(12, 2))
+        self.entry_nome = ctk.CTkEntry(self.frame_form, placeholder_text="Ex: Montanha-Russa do Terror", width=220)
+        self.entry_nome.grid(row=1, column=0, padx=15, pady=(0, 10))
 
-        self.entry_capacidade = ctk.CTkEntry(self.frame_form, placeholder_text="Capacidade (ex: 20)", width=200)
-        self.entry_capacidade.grid(row=0, column=1, padx=15, pady=10)
+        # Campo Capacidade
+        self.lbl_capacidade = ctk.CTkLabel(self.frame_form, text="Capacidade Max.:", font=ctk.CTkFont(size=12, weight="bold"))
+        self.lbl_capacidade.grid(row=0, column=1, sticky="w", padx=15, pady=(12, 2))
+        self.entry_capacidade = ctk.CTkEntry(self.frame_form, placeholder_text="Ex: 20", width=220)
+        self.entry_capacidade.grid(row=1, column=1, padx=15, pady=(0, 10))
 
-        self.entry_idade = ctk.CTkEntry(self.frame_form, placeholder_text="Idade Mínima", width=200)
-        self.entry_idade.grid(row=1, column=0, padx=15, pady=10)
+        # --- LINHA 1: Idade Mínima e Horário ---
+        # Campo Idade Mínima
+        self.lbl_idade = ctk.CTkLabel(self.frame_form, text="Idade Mínima (anos):", font=ctk.CTkFont(size=12, weight="bold"))
+        self.lbl_idade.grid(row=2, column=0, sticky="w", padx=15, pady=(5, 2))
+        self.entry_idade = ctk.CTkEntry(self.frame_form, placeholder_text="Ex: 12", width=220)
+        self.entry_idade.grid(row=3, column=0, padx=15, pady=(0, 10))
 
-        self.entry_horario = ctk.CTkEntry(self.frame_form, placeholder_text="Horário (ex: 10h-18h)", width=200)
-        self.entry_horario.grid(row=1, column=1, padx=15, pady=10)
+        # Campo Horário
+        self.lbl_horario = ctk.CTkLabel(self.frame_form, text="Horário de Funcionamento:", font=ctk.CTkFont(size=12, weight="bold"))
+        self.lbl_horario.grid(row=2, column=1, sticky="w", padx=15, pady=(5, 2))
+        self.entry_horario = ctk.CTkEntry(self.frame_form, placeholder_text="Ex: 10h-18h", width=220)
+        self.entry_horario.grid(row=3, column=1, padx=15, pady=(0, 10))
 
-        self.lbl_prioridade = ctk.CTkLabel(self.frame_form, text="Aceita Passe VIP?")
-        self.lbl_prioridade.grid(row=2, column=0, padx=15, pady=5, sticky="e")
+        # --- LINHA 2: Aceita Passe VIP ---
+        self.lbl_prioridade = ctk.CTkLabel(self.frame_form, text="Aceita Passe VIP / Anual?", font=ctk.CTkFont(size=12, weight="bold"))
+        self.lbl_prioridade.grid(row=4, column=0, columnspan=2, sticky="w", padx=15, pady=(5, 2))
 
-        self.combo_prioridade = ctk.CTkComboBox(self.frame_form, values=["Sim", "Não"], width=100)
-        self.combo_prioridade.grid(row=2, column=1, padx=15, pady=5, sticky="w")
+        self.combo_prioridade = ctk.CTkComboBox(
+            self.frame_form, 
+            values=["Sim", "Não"], 
+            width=470
+        )
+        self.combo_prioridade.grid(row=5, column=0, columnspan=2, padx=15, pady=(0, 10))
         self.combo_prioridade.set("Sim")
 
-        self.btn_salvar = ctk.CTkButton(self.frame_form, text="Salvar Atração", command=self.salvar_atracao)
-        self.btn_salvar.grid(row=3, column=0, columnspan=2, pady=20)
+        # --- BOTÃO DE AÇÃO (Verde de Confirmação) ---
+        self.btn_salvar = ctk.CTkButton(
+            self.frame_form, 
+            text=" ✓ Salvar Atração", 
+            fg_color="#10b981", 
+            hover_color="#059669",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=38,
+            width=200,
+            command=self.salvar_atracao
+        )
+        self.btn_salvar.grid(row=6, column=0, columnspan=2, pady=(15, 10))
 
-        self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", text_color="green")
-        self.lbl_mensagem.grid(row=4, column=0, columnspan=2)
+        self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", font=ctk.CTkFont(size=12, weight="bold"))
+        self.lbl_mensagem.grid(row=7, column=0, columnspan=2, pady=(0, 10))
 
-        # --- LISTAGEM DE ATRAÇÕES (READ) ---
-        self.lbl_lista = ctk.CTkLabel(self, text="Atrações Cadastradas:", font=("Arial", 16, "bold"))
-        self.lbl_lista.pack(pady=(20, 0))
+        # --- LISTAGEM DE ATRAÇÕES ---
+        self.lbl_lista = ctk.CTkLabel(self, text="Atrações Cadastradas", font=ctk.CTkFont(size=16, weight="bold"))
+        self.lbl_lista.pack(pady=(15, 5))
 
-        # Substituímos a velha caixa de texto pelo ScrollableFrame transparente!
-        self.frame_lista = ctk.CTkScrollableFrame(self, height=250, fg_color="transparent")
-        self.frame_lista.pack(pady=10, padx=20, fill="both", expand=True)
+        self.frame_lista = ctk.CTkScrollableFrame(self, height=220, fg_color="transparent")
+        self.frame_lista.pack(pady=5, padx=20, fill="both", expand=True)
 
         self.atualizar_lista()
 
@@ -58,75 +101,83 @@ class TelaAtracao(ctk.CTkFrame):
         horario = self.entry_horario.get()
         prioridade_str = self.combo_prioridade.get()
 
-        # Validação básica
         if not nome or not capacidade or not idade:
-            self.lbl_mensagem.configure(text="Preencha Nome, Capacidade e Idade Mínima!", text_color="red")
+            self.lbl_mensagem.configure(text="⚠ Preencha Nome, Capacidade e Idade Mínima!", text_color="#f87171")
             return
 
-        # Converte valores numéricos (Evita que o app quebre se o usuário digitar letras)
         try:
             capacidade_int = int(capacidade)
             idade_int = int(idade)
         except ValueError:
-            self.lbl_mensagem.configure(text="Capacidade e Idade devem ser apenas números!", text_color="red")
+            self.lbl_mensagem.configure(text="⚠ Capacidade e Idade devem ser apenas números!", text_color="#f87171")
             return
         
-        # Converte o texto da caixinha para o booleano (True ou False) que a lógica espera
         aceita_prioridade = True if prioridade_str == "Sim" else False
 
-        # Envia para o serviço salvar
         msg = self.servico.cadastrar_atracao(nome, capacidade_int, idade_int, horario, aceita_prioridade)
-        self.lbl_mensagem.configure(text=msg, text_color="green")
+        self.lbl_mensagem.configure(text=f"✓ {msg}", text_color="#34d399")
 
-        # Limpa os campos
+        # Limpar os campos
         self.entry_nome.delete(0, 'end')
         self.entry_capacidade.delete(0, 'end')
         self.entry_idade.delete(0, 'end')
         self.entry_horario.delete(0, 'end')
         self.combo_prioridade.set("Sim")
 
-        # Atualiza a lista da tela
         self.atualizar_lista()
 
     def atualizar_lista(self):
-        # Limpa os cartões antigos da tela
         for widget in self.frame_lista.winfo_children():
             widget.destroy()
 
         atracoes = self.servico.listar_atracoes()
 
         if not atracoes:
-            lbl_vazio = ctk.CTkLabel(self.frame_lista, text="Nenhuma atração cadastrada ainda.", font=("Arial", 16, "italic"), text_color="gray")
+            lbl_vazio = ctk.CTkLabel(
+                self.frame_lista, 
+                text="Nenhuma atração cadastrada ainda.", 
+                font=ctk.CTkFont(size=14, slant="italic"), 
+                text_color="#9ca3af"
+            )
             lbl_vazio.pack(pady=30)
             return
 
         for a in atracoes:
-            # Cria o fundo do cartão
-            card = ctk.CTkFrame(self.frame_lista, corner_radius=10, border_width=1, border_color="#3a3a3a")
-            card.pack(pady=5, padx=10, fill="x")
+            card = ctk.CTkFrame(self.frame_lista, corner_radius=10, border_width=1, border_color="#374151")
+            card.pack(pady=4, padx=5, fill="x")
 
-            # --- LINHA SUPERIOR (Nome da Atração e Etiqueta de Prioridade) ---
+            # Topo do Card
             frame_topo = ctk.CTkFrame(card, fg_color="transparent")
-            frame_topo.pack(fill="x", padx=15, pady=(10, 0)) # Margem no topo
+            frame_topo.pack(fill="x", padx=15, pady=(8, 2))
 
-            # Nome da atração num tom azulado para diferenciar das pessoas
-            lbl_nome = ctk.CTkLabel(frame_topo, text=a.nome, font=("Arial", 16, "bold"), text_color="#1f6aa5")
+            lbl_nome = ctk.CTkLabel(frame_topo, text=a.nome, font=ctk.CTkFont(size=15, weight="bold"), text_color="#38bdf8")
             lbl_nome.pack(side="left")
 
-            # Etiqueta visual se aceita fura-fila ou não
+            # Etiqueta visual de Aceita Prioridade
             if a.aceita_prioridade:
-                lbl_prio = ctk.CTkLabel(frame_topo, text="⚡ VIP / Anual", font=("Arial", 14, "bold"), text_color="#ffd700")
+                lbl_prio = ctk.CTkLabel(
+                    frame_topo, 
+                    text=" ⚡ ACEITA VIP / ANUAL ", 
+                    font=ctk.CTkFont(size=12, weight="bold"), 
+                    text_color="#fef08a", 
+                    fg_color="#854d0e", 
+                    corner_radius=6
+                )
             else:
-                lbl_prio = ctk.CTkLabel(frame_topo, text="🚶 Fila Comum", font=("Arial", 12), text_color="gray")
+                lbl_prio = ctk.CTkLabel(
+                    frame_topo, 
+                    text=" FILA COMUM ", 
+                    font=ctk.CTkFont(size=12), 
+                    text_color="#e5e7eb", 
+                    fg_color="#374151", 
+                    corner_radius=6
+                )
             lbl_prio.pack(side="right")
 
-            # --- LINHA INFERIOR (Dados operacionais do brinquedo) ---
+            # Base do Card
             frame_base = ctk.CTkFrame(card, fg_color="transparent")
-            frame_base.pack(fill="x", padx=15, pady=(5, 10)) # Margem na base
+            frame_base.pack(fill="x", padx=15, pady=(2, 8))
             
-            # Formatamos os detalhes da atração. 
-            # (Se o seu modelo 'Atracao' tiver mais atributos como 'duracao', basta adicionar aqui!)
-            info_texto = f"Capacidade: {a.capacidade} pessoas  |  Idade Mínima: {a.idade_minima} anos | Horário: {a.horario}"
-            
-            lbl_info = ctk.CTkLabel(frame_base, text=info_texto, font=("Arial", 13), text_color="#a0a0a0")
+            info_texto = f"Capacidade: {a.capacidade} pessoas  •  Idade Mínima: {a.idade_minima} anos  •  Horário: {a.horario}"
+            lbl_info = ctk.CTkLabel(frame_base, text=info_texto, font=ctk.CTkFont(size=12), text_color="#9ca3af")
             lbl_info.pack(side="left")
