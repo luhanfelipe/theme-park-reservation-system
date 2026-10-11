@@ -8,9 +8,9 @@ class ParqueService:
         self.visitantes = ListaEncadeada()
         self.atracoes = ListaEncadeada()
 
-    def cadastrar_visitante(self, nome, idade, cpf, data_nascimento, email, tipo_passe):
+    def cadastrar_visitante(self, nome, idade, cpf, data_nascimento, email, tipo_passe, cartao=""):
         """Cria um visitante, armazena-o e informa se o cadastro foi concluído."""
-        novo_visitante = Visitante(nome, idade, cpf, data_nascimento, email, tipo_passe)
+        novo_visitante = Visitante(nome, idade, cpf, data_nascimento, email, tipo_passe, cartao)
         self.visitantes.inserir(novo_visitante)
         return "Visitante cadastrado com sucesso!"
 
