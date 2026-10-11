@@ -1,8 +1,10 @@
 from src.structures.fila_prioridade import FilaPrioridade
 
+
 class Atracao:
-    def __init__(self, nome, capacidade, idade_minima, horario, aceita_prioridade):
+    def __init__(self, nome, tipo, capacidade, idade_minima, horario, aceita_prioridade):
         self.nome = nome
+        self.tipo = tipo
         self.capacidade = capacidade
         self.idade_minima = idade_minima
         self.horario = horario
