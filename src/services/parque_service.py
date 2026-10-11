@@ -19,7 +19,7 @@ class ParqueService:
         nova_atracao = Atracao(nome, capacidade, idade_minima, horario, aceita_prioridade)
         self.atracoes.inserir(nova_atracao)
         return "Atração cadastrada com sucesso!"
-        
+
     def listar_visitantes(self):
         """Converte os visitantes da lista encadeada em uma lista comum para a GUI."""
         lista = []
@@ -38,38 +38,32 @@ class ParqueService:
             atual = atual.proximo
         return lista
 
-    def adicionar_visitante_na_fila(self, cpf, nome_atracao):
-        """Valida visitante e atração e adiciona o visitante à fila correspondente."""
 
-        # Procura o visitante pelo CPF na lista encadeada.
-        visitante_encontrado = None
-        atual_v = self.visitantes.inicio
-        while atual_v is not None:
-            if atual_v.dado.cpf == cpf:
-                visitante_encontrado = atual_v.dado
-                break
-            atual_v = atual_v.proximo
-            
+    def adicionar_visitante_na_fila(self, cpf, nome_atracao):
+        """Valida visitante e atração e adiciona o visitante à fila."""
+
+        visitante_encontrado = self.visitantes.buscar_por("cpf", cpf)
+
         if visitante_encontrado is None:
             return "Erro: Visitante não encontrado."
 
-        # Procura a atração pelo nome na lista encadeada.
-        atracao_encontrada = None
-        atual_a = self.atracoes.inicio
-        while atual_a is not None:
-            if atual_a.dado.nome == nome_atracao:
-                atracao_encontrada = atual_a.dado
-                break
-            atual_a = atual_a.proximo
+        atracao_encontrada = self.atracoes.buscar_por("nome", nome_atracao)
 
         if atracao_encontrada is None:
             return "Erro: Atração não encontrada."
 
-        # Impede a entrada quando o visitante não atende à idade mínima.
         if int(visitante_encontrado.idade) < atracao_encontrada.idade_minima:
-            return f"Erro: {visitante_encontrado.nome} não tem a idade mínima para {atracao_encontrada.nome}."
+            return (
+                f"Erro: {visitante_encontrado.nome} não tem a idade mínima "
+                f"para {atracao_encontrada.nome}."
+            )
 
-        # A própria fila aplica a regra de prioridade quando a atração permite.
-        atracao_encontrada.fila_virtual.enfileirar(visitante_encontrado, atracao_encontrada.aceita_prioridade)
-        
-        return f"Sucesso: {visitante_encontrado.nome} entrou na fila para {atracao_encontrada.nome}!"
+        atracao_encontrada.fila_virtual.enfileirar(
+            visitante_encontrado,
+            atracao_encontrada.aceita_prioridade
+        )
+
+        return (
+            f"Sucesso: {visitante_encontrado.nome} entrou na fila "
+            f"para {atracao_encontrada.nome}!"
+        )
