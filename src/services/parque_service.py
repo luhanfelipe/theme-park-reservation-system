@@ -2,6 +2,7 @@ from src.structures.lista_encadeada import ListaEncadeada
 from src.models.visitante import Visitante
 from src.models.atracao import Atracao
 
+
 class ParqueService:
     def __init__(self):
         """Inicializa as listas encadeadas de visitantes e atrações do parque."""
@@ -14,9 +15,9 @@ class ParqueService:
         self.visitantes.inserir(novo_visitante)
         return "Visitante cadastrado com sucesso!"
 
-    def cadastrar_atracao(self, nome, capacidade, idade_minima, horario, aceita_prioridade):
+    def cadastrar_atracao(self, nome, tipo, capacidade, idade_minima, horario, aceita_prioridade):
         """Cria uma atração, armazena-a e informa se o cadastro foi concluído."""
-        nova_atracao = Atracao(nome, capacidade, idade_minima, horario, aceita_prioridade)
+        nova_atracao = Atracao(nome, tipo, capacidade, idade_minima, horario, aceita_prioridade)
         self.atracoes.inserir(nova_atracao)
         return "Atração cadastrada com sucesso!"
 
@@ -37,7 +38,6 @@ class ParqueService:
             lista.append(atual.dado)
             atual = atual.proximo
         return lista
-
 
     def adicionar_visitante_na_fila(self, cpf, nome_atracao):
         """Valida visitante e atração e adiciona o visitante à fila."""
