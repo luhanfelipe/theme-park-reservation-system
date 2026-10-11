@@ -1,9 +1,11 @@
 import customtkinter as ctk
 
-class TelaVisitante(ctk.CTkFrame):
+class TelaVisitante(ctk.CTkScrollableFrame):
     def __init__(self, master, servico, comando_voltar):
         # O "master" é o frame_principal lá do main.py. Fundo transparente para herdar a cor do main.
         super().__init__(master, fg_color="transparent")
+
+        self._scrollbar.grid_forget()
         
         self.servico = servico 
 
@@ -29,7 +31,7 @@ class TelaVisitante(ctk.CTkFrame):
             text_color=COR_TEXTO,
             command=comando_voltar
         )
-        self.btn_voltar.place(x=20, y=15)
+        self.btn_voltar.pack(anchor="nw", padx=20, pady=(20, 0))
 
         # --- TÍTULO DA TELA ---
         self.lbl_titulo = ctk.CTkLabel(
@@ -41,7 +43,6 @@ class TelaVisitante(ctk.CTkFrame):
         self.lbl_titulo.pack(pady=(15, 10))
 
         # --- FORMULÁRIO DE CADASTRO ---
-        # Aplicando o efeito "Falso Vidro"
         self.frame_form = ctk.CTkFrame(
             self, 
             corner_radius=15, 
@@ -101,27 +102,47 @@ class TelaVisitante(ctk.CTkFrame):
         self.combo_passe.grid(row=5, column=1, padx=15, pady=(0, 10))
         self.combo_passe.set("Normal")
 
+        # --- DADOS BANCÁRIOS---
+
+        self.lbl_num_cartao = ctk.CTkLabel(self.frame_form, text="Número do Cartão (Opcional):", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
+        self.lbl_num_cartao.grid(row=6, column=0, sticky="w", padx=15, pady=(5, 2))
+
+        self.entry_num_cartao = ctk.CTkEntry(self.frame_form, placeholder_text="0000 0000 0000 0000", width=220, fg_color=COR_INPUT_BG, border_color="#374151")
+        self.entry_num_cartao.grid(row=7, column=0, padx=15, pady=(0, 10))
+        self.entry_num_cartao.bind("<KeyRelease>", self.limitar_num_cartao)
+
+        self.lbl_val_cvc = ctk.CTkLabel(self.frame_form, text="Validade (MM/AA)  e  CVC:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
+        self.lbl_val_cvc.grid(row=6, column=1, sticky="w", padx=15, pady=(5, 2))
+
+        self.frame_val_cvc = ctk.CTkFrame(self.frame_form, fg_color="transparent")
+        self.frame_val_cvc.grid(row=7, column=1, sticky="w", padx=15, pady=(0, 10))
+
+        self.entry_val_cartao = ctk.CTkEntry(self.frame_val_cvc, placeholder_text="MM/AA", width=100, fg_color=COR_INPUT_BG, border_color="#374151")
+        self.entry_val_cartao.pack(side="left", padx=(0, 10)) # Margem à direita para separar do CVC
+        self.entry_val_cartao.bind("<KeyRelease>", self.limitar_val_cartao)
+
+        self.entry_cvc_cartao = ctk.CTkEntry(self.frame_val_cvc, placeholder_text="CVC", width=110, fg_color=COR_INPUT_BG, border_color="#374151")
+        self.entry_cvc_cartao.pack(side="left")
+        self.entry_cvc_cartao.bind("<KeyRelease>", self.limitar_cvc_cartao)
+
         # --- BOTÃO DE AÇÃO (Roxo Premium) ---
         self.btn_salvar = ctk.CTkButton(
-            self.frame_form, 
-            text=" ✓ Salvar Visitante", 
-            fg_color=COR_BOTAO_ROXO, 
-            hover_color=COR_HOVER_ROXO,
-            font=ctk.CTkFont(size=14, weight="bold"),
-            height=38,
-            width=200,
+            self.frame_form, text=" ✓ Cadastrar Visitante", 
+            fg_color=COR_BOTAO_ROXO, hover_color=COR_HOVER_ROXO,
+            font=ctk.CTkFont(size=14, weight="bold"), height=38, width=200,
             command=self.salvar_visitante
         )
-        self.btn_salvar.grid(row=6, column=0, columnspan=2, pady=(15, 10))
+
+        self.btn_salvar.grid(row=8, column=0, columnspan=2, pady=(15, 15))
 
         self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", font=ctk.CTkFont(size=12, weight="bold"))
-        self.lbl_mensagem.grid(row=7, column=0, columnspan=2, pady=(0, 10))
+        self.lbl_mensagem.grid(row=9, column=0, columnspan=2, pady=(0, 10))
 
         # --- LISTAGEM DE VISITANTES ---
         self.lbl_lista = ctk.CTkLabel(self, text=" 👤 Visitantes Cadastrados", font=ctk.CTkFont(size=16, weight="bold"), text_color=COR_TEXTO)
         self.lbl_lista.pack(pady=(15, 5))
 
-        self.frame_lista = ctk.CTkScrollableFrame(self, height=220, fg_color="transparent")
+        self.frame_lista = ctk.CTkFrame(self, fg_color="transparent")
         self.frame_lista.pack(pady=5, padx=20, fill="both", expand=True)
 
         # Carrega a lista inicial de visitantes
@@ -129,13 +150,39 @@ class TelaVisitante(ctk.CTkFrame):
 
     def limitar_cpf(self, event):
         texto = self.entry_cpf.get()
-        if len(texto) > 11:
-            self.entry_cpf.delete(11, "end")
+        apenas_numeros = "".join(filter(str.isdigit, texto))
+        if texto != apenas_numeros or len(apenas_numeros) > 11:
+            self.entry_cpf.delete(0, "end")
+            self.entry_cpf.insert(0, apenas_numeros[:11])
 
     def limitar_data(self, event):
         texto = self.entry_data.get()
-        if len(texto) > 8:
-            self.entry_data.delete(8, "end")
+        apenas_numeros = "".join(filter(str.isdigit, texto))
+        if texto != apenas_numeros or len(apenas_numeros) > 8:
+            self.entry_data.delete(0, "end")
+            self.entry_data.insert(0, apenas_numeros[:8])
+
+    def limitar_num_cartao(self, event):
+        texto = self.entry_num_cartao.get()
+        # Filtra para deixar apenas números (impede letras e espaços) e corta no 16
+        apenas_numeros = "".join(filter(str.isdigit, texto))
+        if texto != apenas_numeros or len(apenas_numeros) > 16:
+            self.entry_num_cartao.delete(0, "end")
+            self.entry_num_cartao.insert(0, apenas_numeros[:16])
+
+    def limitar_val_cartao(self, event):
+        texto = self.entry_val_cartao.get()
+        apenas_numeros = "".join(filter(str.isdigit, texto))
+        if texto != apenas_numeros or len(apenas_numeros) > 4:
+            self.entry_val_cartao.delete(0, "end")
+            self.entry_val_cartao.insert(0, apenas_numeros[:4])
+
+    def limitar_cvc_cartao(self, event):
+        texto = self.entry_cvc_cartao.get()
+        apenas_numeros = "".join(filter(str.isdigit, texto))
+        if texto != apenas_numeros or len(apenas_numeros) > 4:
+            self.entry_cvc_cartao.delete(0, "end")
+            self.entry_cvc_cartao.insert(0, apenas_numeros[:4])
 
     def salvar_visitante(self):
         nome = self.entry_nome.get()
@@ -144,6 +191,9 @@ class TelaVisitante(ctk.CTkFrame):
         data = self.entry_data.get()
         email = self.entry_email.get()
         passe = self.combo_passe.get()
+        num_cartao = self.entry_num_cartao.get()
+        val_cartao = self.entry_val_cartao.get()
+        cvc_cartao = self.entry_cvc_cartao.get()
 
         if not nome or not idade or not cpf:
             self.lbl_mensagem.configure(text="⚠ Preencha pelo menos Nome, Idade e CPF!", text_color="#f87171")
@@ -158,7 +208,11 @@ class TelaVisitante(ctk.CTkFrame):
         if len(data_limpa) == 8:
             data = f"{data_limpa[:2]}/{data_limpa[2:4]}/{data_limpa[4:]}"
 
-        msg = self.servico.cadastrar_visitante(nome, idade, cpf, data, email, passe)
+        cartao_formatado = ""
+        if num_cartao or val_cartao or cvc_cartao:
+            cartao_formatado = f"Num: {num_cartao} | Val: {val_cartao} | CVC: {cvc_cartao}"
+
+        msg = self.servico.cadastrar_visitante(nome, idade, cpf, data, email, passe, cartao_formatado)
         self.lbl_mensagem.configure(text=f"✓ {msg}", text_color="#34d399")
 
         # Limpar os campos
@@ -167,6 +221,9 @@ class TelaVisitante(ctk.CTkFrame):
         self.entry_cpf.delete(0, 'end')
         self.entry_data.delete(0, 'end')
         self.entry_email.delete(0, 'end')
+        self.entry_num_cartao.delete(0, 'end')
+        self.entry_val_cartao.delete(0, 'end')
+        self.entry_cvc_cartao.delete(0, 'end')
         self.combo_passe.set("Normal")
 
         self.atualizar_lista()
@@ -234,6 +291,7 @@ class TelaVisitante(ctk.CTkFrame):
             frame_base = ctk.CTkFrame(card, fg_color="transparent")
             frame_base.pack(fill="x", padx=15, pady=(2, 8))
             
-            info_texto = f"CPF: {v.cpf}  •  Idade: {v.idade} anos  •  Nasc: {v.data_nascimento}  •  E-mail: {v.email}"
+            tem_cartao = "Sim" if hasattr(v, 'cartao') and v.cartao else "Não"
+            info_texto = f"CPF: {v.cpf}  •  Idade: {v.idade} anos  •  Nasc: {v.data_nascimento}  •  E-mail: {v.email}   •  Possui Cartão: {tem_cartao}"
             lbl_info = ctk.CTkLabel(frame_base, text=info_texto, font=ctk.CTkFont(size=12), text_color="#A0A0A0") # Texto secundário mais suave
             lbl_info.pack(side="left")
