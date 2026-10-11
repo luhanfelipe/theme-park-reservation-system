@@ -6,3 +6,6 @@ class Visitante:
         self.data_nascimento = data_nascimento
         self.email = email
         self.tipo_passe = tipo_passe
+
+    def __str__(self):
+        return f"{self.nome} ({self.tipo_passe})"
