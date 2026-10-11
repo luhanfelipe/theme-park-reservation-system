@@ -2,8 +2,18 @@ import customtkinter as ctk
 
 class TelaFila(ctk.CTkFrame):
     def __init__(self, master, servico, comando_voltar):
-        super().__init__(master)
+        
+        super().__init__(master, fg_color="transparent")
         self.servico = servico
+
+        # Cores da Paleta Magia Premium
+        COR_FUNDO_VIDRO = "#2A2D3E"
+        COR_BORDA_NEON = "#5A52D5"
+        COR_BOTAO_ROXO = "#6C63FF"
+        COR_HOVER_ROXO = "#5A52D5"
+        COR_TEXTO = "#FFFFFF"
+        COR_TEXTO_SEC = "#A0A0A0"
+        COR_INPUT_BG = "#1F1D2B"
 
         # --- BOTÃO VOLTAR ---
         self.btn_voltar = ctk.CTkButton(
@@ -13,8 +23,9 @@ class TelaFila(ctk.CTkFrame):
             height=32,
             fg_color="transparent", 
             border_width=1, 
-            border_color="#4b5563",
-            hover_color="#374151",
+            border_color=COR_BORDA_NEON,
+            hover_color=COR_FUNDO_VIDRO,
+            text_color=COR_TEXTO,
             command=comando_voltar
         )
         self.btn_voltar.place(x=20, y=15)
@@ -23,47 +34,57 @@ class TelaFila(ctk.CTkFrame):
         self.lbl_titulo = ctk.CTkLabel(
             self, 
             text="⧖ Fila Virtual - Entrada", 
-            font=ctk.CTkFont(size=22, weight="bold")
+            font=ctk.CTkFont(size=22, weight="bold"),
+            text_color=COR_TEXTO
         )
         self.lbl_titulo.pack(pady=(15, 5))
 
-        # LEGENDA DE PRIORIDADES
         self.lbl_legenda = ctk.CTkLabel(
             self,
             text="Ordem de Atendimento: ★ VIP  ➔  🏷 PASSE ANUAL  ➔  NORMAL",
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color="#9ca3af"
+            text_color=COR_TEXTO_SEC
         )
         self.lbl_legenda.pack(pady=(0, 10))
 
-        # --- FORMULÁRIO DE ENTRADA ---
-        self.frame_form = ctk.CTkFrame(self, corner_radius=12, border_width=1, border_color="#374151")
+        # --- FORMULÁRIO DE ENTRADA (Efeito Falso Vidro) ---
+        self.frame_form = ctk.CTkFrame(
+            self, 
+            corner_radius=15, 
+            fg_color=COR_FUNDO_VIDRO, 
+            border_width=1, 
+            border_color=COR_BORDA_NEON
+        )
         self.frame_form.pack(pady=10, padx=20, anchor="center")
 
         # Campo CPF
-        self.lbl_cpf = ctk.CTkLabel(self.frame_form, text="CPF do Visitante:", font=ctk.CTkFont(size=12, weight="bold"))
+        self.lbl_cpf = ctk.CTkLabel(self.frame_form, text="CPF do Visitante:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
         self.lbl_cpf.grid(row=0, column=0, sticky="w", padx=15, pady=(12, 2))
-        self.entry_cpf = ctk.CTkEntry(self.frame_form, placeholder_text="00000000000", width=220)
+        self.entry_cpf = ctk.CTkEntry(self.frame_form, placeholder_text="00000000000", width=220, fg_color=COR_INPUT_BG, border_color="#374151")
         self.entry_cpf.grid(row=1, column=0, padx=15, pady=(0, 10))
         self.entry_cpf.bind("<KeyRelease>", self.limitar_cpf)
 
         # Campo Seleção de Atração
-        self.lbl_atracao = ctk.CTkLabel(self.frame_form, text="Selecione a Atração:", font=ctk.CTkFont(size=12, weight="bold"))
+        self.lbl_atracao = ctk.CTkLabel(self.frame_form, text="Selecione a Atração:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
         self.lbl_atracao.grid(row=0, column=1, sticky="w", padx=15, pady=(12, 2))
         self.combo_atracao = ctk.CTkComboBox(
             self.frame_form, 
             values=["Nenhuma atração cadastrada"], 
             width=220, 
+            fg_color=COR_INPUT_BG, 
+            border_color="#374151", 
+            button_color=COR_BOTAO_ROXO, 
+            button_hover_color=COR_HOVER_ROXO,
             command=self.atualizar_lista_fila
         )
         self.combo_atracao.grid(row=1, column=1, padx=15, pady=(0, 10))
 
-        # Botão de Entrada na Fila
+        # Botão de Entrada na Fila (Roxo Premium)
         self.btn_adicionar = ctk.CTkButton(
             self.frame_form, 
             text=" + Adicionar à Fila", 
-            fg_color="#10b981", 
-            hover_color="#059669",
+            fg_color=COR_BOTAO_ROXO, 
+            hover_color=COR_HOVER_ROXO,
             font=ctk.CTkFont(size=14, weight="bold"),
             height=38,
             width=200,
@@ -75,7 +96,7 @@ class TelaFila(ctk.CTkFrame):
         self.lbl_mensagem.grid(row=3, column=0, columnspan=2, pady=(0, 10))
 
         # --- VISUALIZAÇÃO DA FILA ---
-        self.lbl_lista = ctk.CTkLabel(self, text="⧖ Fila Atual da Atração", font=ctk.CTkFont(size=16, weight="bold"))
+        self.lbl_lista = ctk.CTkLabel(self, text="⧖ Fila Atual da Atração", font=ctk.CTkFont(size=16, weight="bold"), text_color=COR_TEXTO)
         self.lbl_lista.pack(pady=(15, 5))
 
         self.frame_lista = ctk.CTkScrollableFrame(self, height=220, fg_color="transparent")
@@ -140,12 +161,13 @@ class TelaFila(ctk.CTkFrame):
                         self.frame_lista, 
                         text="A fila está vazia no momento. Pode entrar!", 
                         font=ctk.CTkFont(size=14, slant="italic"), 
-                        text_color="#9ca3af"
+                        text_color="#A0A0A0"
                     )
                     lbl_vazio.pack(pady=30)
                 else:
                     for posicao, pessoa in enumerate(fila_atual, 1):
-                        card = ctk.CTkFrame(self.frame_lista, corner_radius=10, border_width=1, border_color="#374151")
+                        # Card combinando com o tema (#252836)
+                        card = ctk.CTkFrame(self.frame_lista, corner_radius=10, fg_color="#252836", border_width=1, border_color="#374151")
                         card.pack(pady=4, padx=5, fill="x")
                         
                         # Posição na Fila em Destaque
@@ -167,18 +189,18 @@ class TelaFila(ctk.CTkFrame):
                             card, 
                             text=nome_visitante, 
                             font=ctk.CTkFont(size=15, weight="bold"),
-                            text_color="#e5e7eb"
+                            text_color="#FFFFFF" # Nome a branco para sobressair no fundo escuro
                         )
                         lbl_nome.pack(side="left", padx=10, pady=8)
                         
-                        # Badges de Prioridade
+                        # Badges de Prioridade consistentes
                         if "VIP" in tipo_passe_visitante:
                             lbl_passe = ctk.CTkLabel(
                                 card, 
                                 text=" ★ VIP ", 
                                 font=ctk.CTkFont(size=12, weight="bold"), 
-                                text_color="#fef08a", 
-                                fg_color="#854d0e", 
+                                text_color="#FFD700", 
+                                fg_color="#4B4000", 
                                 corner_radius=6
                             )
                         elif "ANUAL" in tipo_passe_visitante:
@@ -186,8 +208,8 @@ class TelaFila(ctk.CTkFrame):
                                 card, 
                                 text=" 🏷 PASSE ANUAL ", 
                                 font=ctk.CTkFont(size=12, weight="bold"), 
-                                text_color="#bbf7d0", 
-                                fg_color="#166534", 
+                                text_color="#38bdf8", 
+                                fg_color="#0c4a6e", 
                                 corner_radius=6
                             )
                         else:
@@ -195,8 +217,8 @@ class TelaFila(ctk.CTkFrame):
                                 card, 
                                 text=" NORMAL ", 
                                 font=ctk.CTkFont(size=12), 
-                                text_color="#e5e7eb", 
-                                fg_color="#374151", 
+                                text_color="#A0A0A0", 
+                                fg_color="#1F1D2B", 
                                 corner_radius=6
                             )
                         lbl_passe.pack(side="right", padx=15, pady=8)
