@@ -23,8 +23,8 @@ class TelaCadastro(ctk.CTkScrollableFrame):
         # --- BOTÃO VOLTAR ---
         self.btn_voltar = ctk.CTkButton(
             self,
-            text="⬅ Voltar",
-            width=80,
+            text="⬅ Voltar ao Login",
+            width=120,
             height=32,
             fg_color="transparent",
             border_width=1,
@@ -38,7 +38,7 @@ class TelaCadastro(ctk.CTkScrollableFrame):
         # --- TÍTULO DA TELA ---
         self.lbl_titulo = ctk.CTkLabel(
             self,
-            text="👤 Cadastro de Visitantes",
+            text="👤 Criar Nova Conta",
             font=ctk.CTkFont(size=22, weight="bold"),
             text_color=COR_TEXTO
         )
@@ -139,15 +139,6 @@ class TelaCadastro(ctk.CTkScrollableFrame):
         self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", font=ctk.CTkFont(size=12, weight="bold"))
         self.lbl_mensagem.grid(row=11, column=0, columnspan=2, pady=(0, 10))
 
-        # --- LISTAGEM DE VISITANTES ---
-        self.lbl_lista = ctk.CTkLabel(self, text=" 👤 Visitantes Cadastrados", font=ctk.CTkFont(size=16, weight="bold"), text_color=COR_TEXTO)
-        self.lbl_lista.pack(pady=(15, 5))
-
-        self.frame_lista = ctk.CTkFrame(self, fg_color="transparent")
-        self.frame_lista.pack(pady=5, padx=20, fill="both", expand=True)
-
-        self.atualizar_lista()
-
     def limitar_cpf(self, event):
         texto = self.entry_cpf.get()
         apenas_numeros = "".join(filter(str.isdigit, texto))
@@ -221,7 +212,12 @@ class TelaCadastro(ctk.CTkScrollableFrame):
             cartao_formatado = f"Num: {num_cartao} | Val: {val_cartao} | CVC: {cvc_cartao}"
 
         msg = self.servico.cadastrar_visitante(nome, idade, cpf, data, email, passe, cartao_formatado, senha)
-        self.lbl_mensagem.configure(text=f"✓ {msg}", text_color="#34d399")
+        
+        # Ajuste na mensagem de sucesso para orientar o utilizador a fazer login
+        if "Erro" in msg:
+            self.lbl_mensagem.configure(text=f"⚠ {msg}", text_color="#f87171")
+        else:
+            self.lbl_mensagem.configure(text="✓ Conta criada com sucesso! Volte para fazer login.", text_color="#34d399")
 
         # Limpar os campos
         self.entry_nome.delete(0, 'end')
@@ -234,69 +230,3 @@ class TelaCadastro(ctk.CTkScrollableFrame):
         self.entry_cvc_cartao.delete(0, 'end')
         self.entry_senha.delete(0, 'end')
         self.combo_passe.set("Normal")
-
-        self.atualizar_lista()
-
-    def atualizar_lista(self):
-        for widget in self.frame_lista.winfo_children():
-            widget.destroy()
-
-        visitantes = self.servico.listar_visitantes()
-
-        if not visitantes:
-            lbl_vazio = ctk.CTkLabel(
-                self.frame_lista,
-                text="Nenhum visitante cadastrado ainda.",
-                font=ctk.CTkFont(size=14, slant="italic"),
-                text_color="#A0A0A0"
-            )
-            lbl_vazio.pack(pady=30)
-            return
-
-        for v in visitantes:
-            card = ctk.CTkFrame(self.frame_lista, corner_radius=10, fg_color="#252836", border_width=1, border_color="#374151")
-            card.pack(pady=4, padx=5, fill="x")
-
-            frame_topo = ctk.CTkFrame(card, fg_color="transparent")
-            frame_topo.pack(fill="x", padx=15, pady=(8, 2))
-
-            lbl_nome = ctk.CTkLabel(frame_topo, text=v.nome, font=ctk.CTkFont(size=15, weight="bold"), text_color="#FFFFFF")
-            lbl_nome.pack(side="left")
-
-            tipo_passe = str(v.tipo_passe).upper()
-            if "VIP" in tipo_passe:
-                lbl_passe = ctk.CTkLabel(
-                    frame_topo,
-                    text=" ★ VIP ",
-                    font=ctk.CTkFont(size=12, weight="bold"),
-                    text_color="#FFD700",
-                    fg_color="#4B4000",
-                    corner_radius=6
-                )
-            elif "ANUAL" in tipo_passe:
-                lbl_passe = ctk.CTkLabel(
-                    frame_topo,
-                    text=" 🏷 PASSE ANUAL ",
-                    font=ctk.CTkFont(size=12, weight="bold"),
-                    text_color="#38bdf8",
-                    fg_color="#0c4a6e",
-                    corner_radius=6
-                )
-            else:
-                lbl_passe = ctk.CTkLabel(
-                    frame_topo,
-                    text=" NORMAL ",
-                    font=ctk.CTkFont(size=12),
-                    text_color="#A0A0A0",
-                    fg_color="#1F1D2B",
-                    corner_radius=6
-                )
-            lbl_passe.pack(side="right")
-
-            frame_base = ctk.CTkFrame(card, fg_color="transparent")
-            frame_base.pack(fill="x", padx=15, pady=(2, 8))
-
-            tem_cartao = "Sim" if hasattr(v, 'cartao') and v.cartao else "Não"
-            info_texto = f"CPF: {v.cpf}  •  Idade: {v.idade} anos  •  Nasc: {v.data_nascimento}  •  E-mail: {v.email}   •  Possui Cartão: {tem_cartao}"
-            lbl_info = ctk.CTkLabel(frame_base, text=info_texto, font=ctk.CTkFont(size=12), text_color="#A0A0A0")
-            lbl_info.pack(side="left")

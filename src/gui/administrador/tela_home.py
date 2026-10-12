@@ -148,12 +148,20 @@ class TelaHome(ctk.CTkFrame):
                     lbl_vazio = ctk.CTkLabel(self.frame_mini_filas, text="Nenhuma atração registada.", text_color="#A0A0A0")
                     lbl_vazio.pack(pady=20, anchor="w", padx=10)
                 else:
-                    # Ordena as atrações pela quantidade de pessoas na fila (maior para menor)
-                    atracoes_ordenadas = sorted(atracoes, key=lambda a: len(a.fila_virtual.listar_fila()), reverse=True)
+                    # Busca a verdade absoluta no banco: quem realmente tem uma reserva ativa?
+                    todas_reservas = self.servico.listar_reservas() if hasattr(self.servico, 'listar_reservas') else []
+                    reservas_ativas = [r for r in todas_reservas if getattr(r, 'status', '') == "Ativa"]
+
+                    def tamanho_real_fila(atracao):
+                        # Conta quantas reservas ATIVAS existem com o nome desta atração
+                        return len([r for r in reservas_ativas if getattr(r, 'nome_atracao', '') == atracao.nome])
+
+                    # Ordena as atrações pela quantidade REAL de pessoas na fila (maior para menor)
+                    atracoes_ordenadas = sorted(atracoes, key=tamanho_real_fila, reverse=True)
                     
                     # lista ordenada para desenhar os cartões
                     for a in atracoes_ordenadas:
-                        tamanho_fila = len(a.fila_virtual.listar_fila())
+                        tamanho_fila = tamanho_real_fila(a)
                         
                         mini_card = ctk.CTkFrame(self.frame_mini_filas, fg_color="transparent")
                         mini_card.pack(fill="x", pady=5, anchor="w")
