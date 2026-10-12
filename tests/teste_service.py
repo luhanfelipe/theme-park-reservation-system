@@ -1,10 +1,26 @@
 # Arquivo: tests/teste_service.py
 
+import os
+
+from src.database import db
+
+# Redireciona pro banco de teste ANTES de criar qualquer ParqueService.
+db.CAMINHO_BANCO = os.path.join("data", "teste_service.db")
+
+# Limpa resíduo de execuções anteriores.
+if os.path.exists(db.CAMINHO_BANCO):
+    os.remove(db.CAMINHO_BANCO)
+
 from src.services.parque_service import ParqueService
 
 
 def novo_service():
-    """Cria um ParqueService limpo para cada teste, evitando estado compartilhado."""
+    """Cria um ParqueService limpo. Garante tabelas e zera o banco de teste."""
+    db.criar_tabelas()
+    with db.conectar() as conn:
+        conn.execute("DELETE FROM visitantes")
+        conn.execute("DELETE FROM atracoes")
+        conn.commit()
     return ParqueService()
 
 
@@ -109,4 +125,6 @@ assert a.nome == "Vendaval Eterno", a.nome
 assert a.tipo == "Montanha-Russa", a.tipo
 print("OK:", a.nome, "/", a.tipo)
 
-print("\nTodos os testes do ParqueService passaram!")
+# Limpeza final
+os.remove(db.CAMINHO_BANCO)
+print("\nBanco de teste removido. Todos os testes do ParqueService passaram!")

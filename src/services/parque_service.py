@@ -1,24 +1,35 @@
 from src.structures.lista_encadeada import ListaEncadeada
 from src.models.visitante import Visitante
 from src.models.atracao import Atracao
+from src.database import db
 
 
 class ParqueService:
     def __init__(self):
-        """Inicializa as listas encadeadas de visitantes e atrações do parque."""
+        """Inicializa as listas encadeadas e carrega os dados persistidos."""
         self.visitantes = ListaEncadeada()
         self.atracoes = ListaEncadeada()
 
+        db.criar_tabelas()
+
+        for v in db.carregar_visitantes():
+            self.visitantes.inserir(v)
+
+        for a in db.carregar_atracoes():
+            self.atracoes.inserir(a)
+
     def cadastrar_visitante(self, nome, idade, cpf, data_nascimento, email, tipo_passe, cartao=""):
-        """Cria um visitante, armazena-o e informa se o cadastro foi concluído."""
+        """Cria um visitante, armazena-o em memória e persiste no banco."""
         novo_visitante = Visitante(nome, idade, cpf, data_nascimento, email, tipo_passe, cartao)
         self.visitantes.inserir(novo_visitante)
+        db.salvar_visitante(novo_visitante)
         return "Visitante cadastrado com sucesso!"
 
     def cadastrar_atracao(self, nome, tipo, capacidade, idade_minima, horario, aceita_prioridade):
-        """Cria uma atração, armazena-a e informa se o cadastro foi concluído."""
+        """Cria uma atração, armazena-a em memória e persiste no banco."""
         nova_atracao = Atracao(nome, tipo, capacidade, idade_minima, horario, aceita_prioridade)
         self.atracoes.inserir(nova_atracao)
+        db.salvar_atracao(nova_atracao)
         return "Atração cadastrada com sucesso!"
 
     def listar_visitantes(self):
