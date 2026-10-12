@@ -1,10 +1,11 @@
 import customtkinter as ctk
 
 
-class TelaAtracao(ctk.CTkFrame):
+class TelaAtracao(ctk.CTkScrollableFrame):
     def __init__(self, master, servico, comando_voltar):
         # Fundo transparente para herdar o roxo super escuro (#1F1D2B) do main.py
         super().__init__(master, fg_color="transparent")
+        self._scrollbar.grid_forget()
         self.servico = servico
 
         # Cores da Paleta Magia Premium
@@ -29,7 +30,7 @@ class TelaAtracao(ctk.CTkFrame):
             text_color=COR_TEXTO,
             command=comando_voltar
         )
-        self.btn_voltar.place(x=20, y=15)
+        self.btn_voltar.pack(anchor="nw", padx=20, pady=(20, 0))
 
         # --- TÍTULO DA TELA ---
         self.lbl_titulo = ctk.CTkLabel(
@@ -58,8 +59,9 @@ class TelaAtracao(ctk.CTkFrame):
 
         self.lbl_capacidade = ctk.CTkLabel(self.frame_form, text="Capacidade Max.:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
         self.lbl_capacidade.grid(row=0, column=1, sticky="w", padx=15, pady=(12, 2))
-        self.entry_capacidade = ctk.CTkEntry(self.frame_form, placeholder_text="Ex: 20", width=220, fg_color=COR_INPUT_BG, border_color="#374151")
-        self.entry_capacidade.grid(row=1, column=1, padx=15, pady=(0, 10))
+        self.entry_cap = ctk.CTkEntry(self.frame_form, placeholder_text="Ex: 20", width=220, fg_color=COR_INPUT_BG, border_color="#374151")
+        self.entry_cap.grid(row=1, column=1, padx=15, pady=(0, 10))
+        self.entry_cap.bind("<KeyRelease>", self.limitar_numeros)
 
         # --- LINHA 1: Tipo e Idade Mínima ---
         self.lbl_tipo = ctk.CTkLabel(self.frame_form, text="Tipo de Atração:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
@@ -88,6 +90,7 @@ class TelaAtracao(ctk.CTkFrame):
         self.lbl_idade.grid(row=2, column=1, sticky="w", padx=15, pady=(5, 2))
         self.entry_idade = ctk.CTkEntry(self.frame_form, placeholder_text="Ex: 12", width=220, fg_color=COR_INPUT_BG, border_color="#374151")
         self.entry_idade.grid(row=3, column=1, padx=15, pady=(0, 10))
+        self.entry_idade.bind("<KeyRelease>", self.limitar_numeros)
 
         # --- LINHA 2: Horário ---
         self.lbl_horario = ctk.CTkLabel(self.frame_form, text="Horário de Funcionamento:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
@@ -131,15 +134,23 @@ class TelaAtracao(ctk.CTkFrame):
         self.lbl_lista = ctk.CTkLabel(self, text="🎢 Atrações Cadastradas", font=ctk.CTkFont(size=16, weight="bold"), text_color=COR_TEXTO)
         self.lbl_lista.pack(pady=(15, 5))
 
-        self.frame_lista = ctk.CTkScrollableFrame(self, height=220, fg_color="transparent")
+        self.frame_lista = ctk.CTkFrame(self, fg_color="transparent")
         self.frame_lista.pack(pady=5, padx=20, fill="both", expand=True)
 
         self.atualizar_lista()
 
+    def limitar_numeros(self, event):
+        widget = event.widget
+        texto = widget.get()
+        apenas_numeros = "".join(filter(str.isdigit, texto))
+        if texto != apenas_numeros:
+            widget.delete(0, "end")
+            widget.insert(0, apenas_numeros)
+
     def salvar_atracao(self):
         nome = self.entry_nome.get()
         tipo = self.combo_tipo.get()
-        capacidade = self.entry_capacidade.get()
+        capacidade = self.entry_cap.get()
         idade = self.entry_idade.get()
         horario = self.entry_horario.get()
         prioridade_str = self.combo_prioridade.get()
@@ -162,7 +173,7 @@ class TelaAtracao(ctk.CTkFrame):
 
         # Limpar os campos
         self.entry_nome.delete(0, 'end')
-        self.entry_capacidade.delete(0, 'end')
+        self.entry_cap.delete(0, 'end')
         self.entry_idade.delete(0, 'end')
         self.entry_horario.delete(0, 'end')
         self.combo_tipo.set("Montanha-Russa")
@@ -219,6 +230,6 @@ class TelaAtracao(ctk.CTkFrame):
             frame_base = ctk.CTkFrame(card, fg_color="transparent")
             frame_base.pack(fill="x", padx=15, pady=(2, 8))
 
-            info_texto = f"Tipo: {a.tipo}  •  Capacidade: {a.capacidade} pessoas  •  Idade Mínima: {a.idade_minima} anos  •  Horário: {a.horario}"
+            info_texto = f"Capacidade: {a.capacidade} pessoas  •  Idade Mínima: {a.idade_minima} anos  •  Horário: {getattr(a, 'horario', 'Não def.')}"
             lbl_info = ctk.CTkLabel(frame_base, text=info_texto, font=ctk.CTkFont(size=12), text_color="#A0A0A0")
             lbl_info.pack(side="left")

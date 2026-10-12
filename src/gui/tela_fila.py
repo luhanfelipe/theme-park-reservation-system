@@ -1,10 +1,11 @@
 import customtkinter as ctk
 
-class TelaFila(ctk.CTkFrame):
+class TelaFila(ctk.CTkScrollableFrame):
     def __init__(self, master, servico, comando_voltar):
-        
         super().__init__(master, fg_color="transparent")
+
         self.servico = servico
+        self._scrollbar.grid_forget()
 
         # Cores da Paleta Magia Premium
         COR_FUNDO_VIDRO = "#2A2D3E"
@@ -28,7 +29,7 @@ class TelaFila(ctk.CTkFrame):
             text_color=COR_TEXTO,
             command=comando_voltar
         )
-        self.btn_voltar.place(x=20, y=15)
+        self.btn_voltar.pack(anchor="nw", padx=20, pady=(20, 0))
 
         # --- TÍTULO DA TELA ---
         self.lbl_titulo = ctk.CTkLabel(
@@ -47,7 +48,7 @@ class TelaFila(ctk.CTkFrame):
         )
         self.lbl_legenda.pack(pady=(0, 10))
 
-        # --- FORMULÁRIO DE ENTRADA (Efeito Falso Vidro) ---
+        # --- FORMULÁRIO DE ENTRADA  ---
         self.frame_form = ctk.CTkFrame(
             self, 
             corner_radius=15, 
@@ -99,15 +100,17 @@ class TelaFila(ctk.CTkFrame):
         self.lbl_lista = ctk.CTkLabel(self, text="⧖ Fila Atual da Atração", font=ctk.CTkFont(size=16, weight="bold"), text_color=COR_TEXTO)
         self.lbl_lista.pack(pady=(15, 5))
 
-        self.frame_lista = ctk.CTkScrollableFrame(self, height=220, fg_color="transparent")
+        self.frame_lista = ctk.CTkFrame(self, fg_color="transparent")
         self.frame_lista.pack(pady=5, padx=20, fill="both", expand=True)
 
         self.carregar_atracoes()
 
     def limitar_cpf(self, event):
-        texto = self.entry_cpf.get()
-        if len(texto) > 11:
-            self.entry_cpf.delete(11, "end")
+            texto = self.entry_cpf.get()
+            apenas_numeros = "".join(filter(str.isdigit, texto))
+            if texto != apenas_numeros or len(apenas_numeros) > 11:
+                self.entry_cpf.delete(0, "end")
+                self.entry_cpf.insert(0, apenas_numeros[:11])
 
     def carregar_atracoes(self):
         atracoes = self.servico.listar_atracoes()

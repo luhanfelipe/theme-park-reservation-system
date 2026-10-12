@@ -113,6 +113,7 @@ class TelaHome(ctk.CTkFrame):
         
         self.frame_mini_filas = ctk.CTkScrollableFrame(frame_dir, fg_color="transparent", height=150)
         self.frame_mini_filas.pack(fill="both", expand=True)
+        self.frame_mini_filas._scrollbar.grid_forget()
 
         # Chama a função para preencher os números reais
         self.atualizar_dashboard()
