@@ -1,13 +1,13 @@
 import customtkinter as ctk
 
-class TelaVisitante(ctk.CTkScrollableFrame):
+class TelaCadastro(ctk.CTkScrollableFrame):
     def __init__(self, master, servico, comando_voltar):
         # O "master" é o frame_principal lá do main.py. Fundo transparente para herdar a cor do main.
         super().__init__(master, fg_color="transparent")
 
         self._scrollbar.grid_forget()
-        
-        self.servico = servico 
+
+        self.servico = servico
 
         # Cores da Paleta Magia Premium
         COR_FUNDO_VIDRO = "#2A2D3E"
@@ -20,12 +20,12 @@ class TelaVisitante(ctk.CTkScrollableFrame):
 
         # --- BOTÃO VOLTAR ---
         self.btn_voltar = ctk.CTkButton(
-            self, 
-            text="⬅ Voltar", 
-            width=80, 
+            self,
+            text="⬅ Voltar",
+            width=80,
             height=32,
-            fg_color="transparent", 
-            border_width=1, 
+            fg_color="transparent",
+            border_width=1,
             border_color=COR_BORDA_NEON,
             hover_color=COR_FUNDO_VIDRO,
             text_color=COR_TEXTO,
@@ -35,8 +35,8 @@ class TelaVisitante(ctk.CTkScrollableFrame):
 
         # --- TÍTULO DA TELA ---
         self.lbl_titulo = ctk.CTkLabel(
-            self, 
-            text="👤 Cadastro de Visitantes", 
+            self,
+            text="👤 Cadastro de Visitantes",
             font=ctk.CTkFont(size=22, weight="bold"),
             text_color=COR_TEXTO
         )
@@ -44,10 +44,10 @@ class TelaVisitante(ctk.CTkScrollableFrame):
 
         # --- FORMULÁRIO DE CADASTRO ---
         self.frame_form = ctk.CTkFrame(
-            self, 
-            corner_radius=15, 
-            fg_color=COR_FUNDO_VIDRO, 
-            border_width=1, 
+            self,
+            corner_radius=15,
+            fg_color=COR_FUNDO_VIDRO,
+            border_width=1,
             border_color=COR_BORDA_NEON
         )
         self.frame_form.pack(pady=10, padx=20, anchor="center")
@@ -91,12 +91,12 @@ class TelaVisitante(ctk.CTkScrollableFrame):
         self.lbl_passe = ctk.CTkLabel(self.frame_form, text="Tipo de Passe:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
         self.lbl_passe.grid(row=4, column=1, sticky="w", padx=15, pady=(5, 2))
         self.combo_passe = ctk.CTkComboBox(
-            self.frame_form, 
-            values=["Normal", "Passe Anual", "VIP"], 
+            self.frame_form,
+            values=["Normal", "Passe Anual", "VIP"],
             width=220,
-            fg_color=COR_INPUT_BG, 
-            border_color="#374151", 
-            button_color=COR_BOTAO_ROXO, 
+            fg_color=COR_INPUT_BG,
+            border_color="#374151",
+            button_color=COR_BOTAO_ROXO,
             button_hover_color=COR_HOVER_ROXO
         )
         self.combo_passe.grid(row=5, column=1, padx=15, pady=(0, 10))
@@ -127,7 +127,7 @@ class TelaVisitante(ctk.CTkScrollableFrame):
 
         # --- BOTÃO DE AÇÃO (Roxo Premium) ---
         self.btn_salvar = ctk.CTkButton(
-            self.frame_form, text=" ✓ Cadastrar Visitante", 
+            self.frame_form, text=" ✓ Cadastrar Visitante",
             fg_color=COR_BOTAO_ROXO, hover_color=COR_HOVER_ROXO,
             font=ctk.CTkFont(size=14, weight="bold"), height=38, width=200,
             command=self.salvar_visitante
@@ -204,7 +204,7 @@ class TelaVisitante(ctk.CTkScrollableFrame):
 
         if len(cpf_limpo) == 11:
             cpf = f"{cpf_limpo[:3]}.{cpf_limpo[3:6]}.{cpf_limpo[6:9]}-{cpf_limpo[9:]}"
-        
+
         if len(data_limpa) == 8:
             data = f"{data_limpa[:2]}/{data_limpa[2:4]}/{data_limpa[4:]}"
 
@@ -236,9 +236,9 @@ class TelaVisitante(ctk.CTkScrollableFrame):
 
         if not visitantes:
             lbl_vazio = ctk.CTkLabel(
-                self.frame_lista, 
-                text="Nenhum visitante cadastrado ainda.", 
-                font=ctk.CTkFont(size=14, slant="italic"), 
+                self.frame_lista,
+                text="Nenhum visitante cadastrado ainda.",
+                font=ctk.CTkFont(size=14, slant="italic"),
                 text_color="#A0A0A0" # Cor mais discreta
             )
             lbl_vazio.pack(pady=30)
@@ -260,29 +260,29 @@ class TelaVisitante(ctk.CTkScrollableFrame):
             tipo_passe = str(v.tipo_passe).upper()
             if "VIP" in tipo_passe:
                 lbl_passe = ctk.CTkLabel(
-                    frame_topo, 
-                    text=" ★ VIP ", 
-                    font=ctk.CTkFont(size=12, weight="bold"), 
+                    frame_topo,
+                    text=" ★ VIP ",
+                    font=ctk.CTkFont(size=12, weight="bold"),
                     text_color="#FFD700", # Dourado
                     fg_color="#4B4000",   # Fundo dourado escuro
                     corner_radius=6
                 )
             elif "ANUAL" in tipo_passe:
                 lbl_passe = ctk.CTkLabel(
-                    frame_topo, 
-                    text=" 🏷 PASSE ANUAL ", 
-                    font=ctk.CTkFont(size=12, weight="bold"), 
+                    frame_topo,
+                    text=" 🏷 PASSE ANUAL ",
+                    font=ctk.CTkFont(size=12, weight="bold"),
                     text_color="#38bdf8", # Azul claro
-                    fg_color="#0c4a6e",   # Azul escuro 
+                    fg_color="#0c4a6e",   # Azul escuro
                     corner_radius=6
                 )
             else:
                 lbl_passe = ctk.CTkLabel(
-                    frame_topo, 
-                    text=" NORMAL ", 
-                    font=ctk.CTkFont(size=12), 
-                    text_color="#A0A0A0", 
-                    fg_color="#1F1D2B", 
+                    frame_topo,
+                    text=" NORMAL ",
+                    font=ctk.CTkFont(size=12),
+                    text_color="#A0A0A0",
+                    fg_color="#1F1D2B",
                     corner_radius=6
                 )
             lbl_passe.pack(side="right")
@@ -290,7 +290,7 @@ class TelaVisitante(ctk.CTkScrollableFrame):
             # Base do Card
             frame_base = ctk.CTkFrame(card, fg_color="transparent")
             frame_base.pack(fill="x", padx=15, pady=(2, 8))
-            
+
             tem_cartao = "Sim" if hasattr(v, 'cartao') and v.cartao else "Não"
             info_texto = f"CPF: {v.cpf}  •  Idade: {v.idade} anos  •  Nasc: {v.data_nascimento}  •  E-mail: {v.email}   •  Possui Cartão: {tem_cartao}"
             lbl_info = ctk.CTkLabel(frame_base, text=info_texto, font=ctk.CTkFont(size=12), text_color="#A0A0A0") # Texto secundário mais suave

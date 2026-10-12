@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from src.services.parque_service import ParqueService
-from src.gui.login.tela_visitante import TelaVisitante
+from src.gui.login.tela_cadastro import TelaCadastro
 from src.gui.administrador.tela_atracao import TelaAtracao
 from src.gui.administrador.tela_fila import TelaFila
 from src.gui.login.tela_login import TelaLogin
@@ -138,7 +138,7 @@ class AppParque(ctk.CTk):
 
     def abrir_tela_visitante(self, btn=None):
         self.limpar_frame_principal()
-        tela = TelaVisitante(self.frame_principal, self.servico, self.abrir_tela_home)
+        tela = TelaCadastro(self.frame_principal, self.servico, self.abrir_tela_home)
         tela.pack(fill="both", expand=True)
         if btn: self.atualizar_botao_ativo(btn)
 
