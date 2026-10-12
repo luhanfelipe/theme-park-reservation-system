@@ -1,41 +1,163 @@
 import customtkinter as ctk
+from src.utils.formatadores import formatar_cpf
+
 
 class TelaLogin(ctk.CTkFrame):
-    def __init__(self, master, on_login_sucesso):
+    def __init__(self, master, servico, on_login_sucesso, on_ir_para_cadastro):
         super().__init__(master)
-        
-        # Guardamos a função que vai liberar o sistema
-        self.on_login_sucesso = on_login_sucesso 
 
-        # Cria um frame menor no centro da tela para ficar com visual de "cartão" de login
+        self.servico = servico
+        self.on_login_sucesso = on_login_sucesso
+        self.on_ir_para_cadastro = on_ir_para_cadastro
+
+        # Cores
+        COR_BOTAO_ROXO = "#6C63FF"
+        COR_HOVER_ROXO = "#5A52D5"
+
+        # Frame central com visual de cartão
         self.frame_login = ctk.CTkFrame(self, corner_radius=15)
         self.frame_login.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.lbl_titulo = ctk.CTkLabel(self.frame_login, text="Login do Sistema", font=("Arial", 24, "bold"))
+        self.lbl_titulo = ctk.CTkLabel(
+            self.frame_login,
+            text="Login do Sistema",
+            font=("Arial", 24, "bold")
+        )
         self.lbl_titulo.pack(pady=(30, 20), padx=40)
 
-        # Campos de texto
-        self.entry_usuario = ctk.CTkEntry(self.frame_login, placeholder_text="Usuário", width=250)
-        self.entry_usuario.pack(pady=10, padx=40)
+        # Abas Visitante / Admin
+        self.tabs = ctk.CTkTabview(self.frame_login, width=320, height=280)
+        self.tabs.pack(pady=(0, 20), padx=30)
+        self.tabs.add("Visitante")
+        self.tabs.add("Admin")
 
-        # O parâmetro show="*" transforma o texto em bolinhas de senha!
-        self.entry_senha = ctk.CTkEntry(self.frame_login, placeholder_text="Senha", width=250, show="*")
-        self.entry_senha.pack(pady=10, padx=40)
+        self._montar_aba_visitante()
+        self._montar_aba_admin()
 
-        self.btn_entrar = ctk.CTkButton(self.frame_login, text="Entrar", command=self.fazer_login, width=250)
-        self.btn_entrar.pack(pady=(20, 10), padx=40)
+    # ------------------------------------------------------------------
+    # ABA VISITANTE
+    # ------------------------------------------------------------------
+    def _montar_aba_visitante(self):
+        COR_BOTAO_ROXO = "#6C63FF"
+        COR_HOVER_ROXO = "#5A52D5"
 
-        self.lbl_mensagem = ctk.CTkLabel(self.frame_login, text="", text_color="red")
-        self.lbl_mensagem.pack(pady=(0, 20))
+        aba = self.tabs.tab("Visitante")
 
-    def fazer_login(self):
-        usuario = self.entry_usuario.get()
-        senha = self.entry_senha.get()
+        self.entry_cpf = ctk.CTkEntry(aba, placeholder_text="CPF (000.000.000-00)", width=260)
+        self.entry_cpf.pack(pady=(20, 10))
+        self.entry_cpf.bind("<KeyRelease>", self._limitar_cpf_login)
+        self.entry_cpf.bind("<FocusOut>", self._formatar_cpf_login)
 
-        # Validando com um usuário fixo de testes
-        if usuario == "root" and senha == "root":
-            self.lbl_mensagem.configure(text="Acesso liberado! Entrando...", text_color="green")
-            # Usa o método after para esperar meio segundo (500ms) antes de mudar de tela
-            self.after(500, self.on_login_sucesso)
-        else:
-            self.lbl_mensagem.configure(text="Usuário ou senha incorretos!", text_color="red")
+        self.entry_senha_visitante = ctk.CTkEntry(aba, placeholder_text="Senha", width=260, show="*")
+        self.entry_senha_visitante.pack(pady=10)
+
+        self.btn_entrar_visitante = ctk.CTkButton(
+            aba,
+            text="Entrar",
+            width=260,
+            fg_color=COR_BOTAO_ROXO,
+            hover_color=COR_HOVER_ROXO,
+            command=self.fazer_login_visitante
+        )
+        self.btn_entrar_visitante.pack(pady=(15, 10))
+
+        self.btn_cadastrar = ctk.CTkButton(
+            aba,
+            text="Não tem conta? Cadastre-se",
+            width=260,
+            fg_color="transparent",
+            hover_color="#2A2D3E",
+            text_color="#A0A0A0",
+            command=self.on_ir_para_cadastro
+        )
+        self.btn_cadastrar.pack(pady=(0, 10))
+
+        self.lbl_msg_visitante = ctk.CTkLabel(aba, text="", text_color="red")
+        self.lbl_msg_visitante.pack(pady=(0, 10))
+
+    # ------------------------------------------------------------------
+    # ABA ADMIN
+    # ------------------------------------------------------------------
+    def _montar_aba_admin(self):
+        COR_BOTAO_ROXO = "#6C63FF"
+        COR_HOVER_ROXO = "#5A52D5"
+
+        aba = self.tabs.tab("Admin")
+
+        self.entry_admin_usuario = ctk.CTkEntry(aba, placeholder_text="Usuário", width=260)
+        self.entry_admin_usuario.pack(pady=(20, 10))
+
+        self.entry_admin_senha = ctk.CTkEntry(aba, placeholder_text="Senha", width=260, show="*")
+        self.entry_admin_senha.pack(pady=10)
+
+        self.btn_entrar_admin = ctk.CTkButton(
+            aba,
+            text="Entrar como Admin",
+            width=260,
+            fg_color=COR_BOTAO_ROXO,
+            hover_color=COR_HOVER_ROXO,
+            command=self.fazer_login_admin
+        )
+        self.btn_entrar_admin.pack(pady=(15, 10))
+
+        self.lbl_msg_admin = ctk.CTkLabel(aba, text="", text_color="red")
+        self.lbl_msg_admin.pack(pady=(0, 10))
+
+    # ------------------------------------------------------------------
+    # FORMATAÇÃO E LIMITAÇÃO DE CPF
+    # ------------------------------------------------------------------
+    def _limitar_cpf_login(self, event=None):
+        """Impede que o campo CPF passe de 11 dígitos enquanto digita."""
+        texto = self.entry_cpf.get()
+        apenas_numeros = "".join(filter(str.isdigit, texto))
+        if len(apenas_numeros) > 11:
+            apenas_numeros = apenas_numeros[:11]
+        if texto != apenas_numeros:
+            self.entry_cpf.delete(0, "end")
+            self.entry_cpf.insert(0, apenas_numeros)
+
+    def _formatar_cpf_login(self, event=None):
+        """Formata o CPF ao sair do campo (perde foco)."""
+        texto_atual = self.entry_cpf.get()
+        formatado = formatar_cpf(texto_atual)
+        if formatado != texto_atual:
+            self.entry_cpf.delete(0, "end")
+            self.entry_cpf.insert(0, formatado)
+
+    # ------------------------------------------------------------------
+    # LOGIN VISITANTE
+    # ------------------------------------------------------------------
+    def fazer_login_visitante(self):
+        cpf = self.entry_cpf.get().strip()
+        senha = self.entry_senha_visitante.get()
+
+        if not cpf or not senha:
+            self.lbl_msg_visitante.configure(text="Preencha CPF e senha!", text_color="red")
+            return
+
+        visitante = self.servico.autenticar_visitante(cpf, senha)
+
+        if visitante is None:
+            self.lbl_msg_visitante.configure(text="CPF ou senha incorretos!", text_color="red")
+            return
+
+        self.lbl_msg_visitante.configure(text="Acesso liberado! Entrando...", text_color="green")
+        self.after(500, lambda: self.on_login_sucesso(perfil="visitante", cpf=visitante.cpf))
+
+    # ------------------------------------------------------------------
+    # LOGIN ADMIN
+    # ------------------------------------------------------------------
+    def fazer_login_admin(self):
+        usuario = self.entry_admin_usuario.get().strip()
+        senha = self.entry_admin_senha.get()
+
+        if not usuario or not senha:
+            self.lbl_msg_admin.configure(text="Preencha usuário e senha!", text_color="red")
+            return
+
+        if not self.servico.autenticar_admin(usuario, senha):
+            self.lbl_msg_admin.configure(text="Usuário ou senha incorretos!", text_color="red")
+            return
+
+        self.lbl_msg_admin.configure(text="Acesso liberado! Entrando...", text_color="green")
+        self.after(500, lambda: self.on_login_sucesso(perfil="admin", cpf=None))

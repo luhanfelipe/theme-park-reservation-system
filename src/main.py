@@ -32,6 +32,7 @@ class AppParque(ctk.CTk):
         self.grid_columnconfigure(1, weight=0)
         self.grid_columnconfigure(2, weight=1)
 
+        self.usuario_logado = None
         self.menu_visivel = False
 
         # --- BARRA LATERAL FINA ---
@@ -112,19 +113,43 @@ class AppParque(ctk.CTk):
 
     def abrir_tela_login(self):
         self.limpar_frame_principal()
-        tela = TelaLogin(self.frame_principal, self.liberar_acesso_sistema)
+        tela = TelaLogin(
+            self.frame_principal,
+            self.servico,
+            self.liberar_acesso_sistema,
+            self.abrir_tela_cadastro_publico
+        )
         tela.pack(fill="both", expand=True)
 
-    def liberar_acesso_sistema(self):
+    def abrir_tela_cadastro_publico(self):
+        """Abre a tela de cadastro a partir do botão 'Cadastre-se' na tela de login."""
+        self.limpar_frame_principal()
+        tela = TelaCadastro(self.frame_principal, self.servico, self.abrir_tela_login)
+        tela.pack(fill="both", expand=True)
+
+    def liberar_acesso_sistema(self, perfil, cpf=None):
+        self.usuario_logado = {"perfil": perfil, "cpf": cpf}
+
         self.limpar_frame_principal()
 
+        # Mostra a barra fina com o ☰ na primeira coluna
         self.frame_fino.grid(row=0, column=0, sticky="nsew")
+
+        # Mostra o menu inteiro na segunda coluna
         self.frame_menu.grid(row=0, column=1, sticky="nsew")
         self.menu_visivel = True
 
+        # Empurra a tela principal para a terceira coluna
         self.frame_principal.grid(row=0, column=2, padx=20, pady=20, sticky="nsew")
 
+        # Ajusta o menu conforme o perfil
+        self._ajustar_menu_para_perfil()
+
         self.abrir_tela_home()
+
+    def _ajustar_menu_para_perfil(self):
+        """O botão de cadastrar visitante sai do menu (é feito pela tela de login)."""
+        self.btn_cadastrar_visitante.grid_remove()
 
     def limpar_frame_principal(self):
         for widget in self.frame_principal.winfo_children():

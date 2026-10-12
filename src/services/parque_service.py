@@ -5,6 +5,10 @@ from src.models.reserva import Reserva
 from src.database import db
 
 
+ADMIN_USUARIO = "admin"
+ADMIN_SENHA = "admin123"
+
+
 class ParqueService:
     def __init__(self):
         """Inicializa as listas encadeadas e carrega os dados persistidos."""
@@ -23,9 +27,9 @@ class ParqueService:
         for r in db.carregar_reservas():
             self.reservas.inserir(r)
 
-    def cadastrar_visitante(self, nome, idade, cpf, data_nascimento, email, tipo_passe, cartao=""):
+    def cadastrar_visitante(self, nome, idade, cpf, data_nascimento, email, tipo_passe, cartao="", senha=""):
         """Cria um visitante, armazena-o em memória e persiste no banco."""
-        novo_visitante = Visitante(nome, idade, cpf, data_nascimento, email, tipo_passe, cartao)
+        novo_visitante = Visitante(nome, idade, cpf, data_nascimento, email, tipo_passe, cartao, senha)
         self.visitantes.inserir(novo_visitante)
         db.salvar_visitante(novo_visitante)
         return "Visitante cadastrado com sucesso!"
@@ -36,6 +40,19 @@ class ParqueService:
         self.atracoes.inserir(nova_atracao)
         db.salvar_atracao(nova_atracao)
         return "Atração cadastrada com sucesso!"
+
+    def autenticar_visitante(self, cpf, senha):
+        """Retorna o Visitante se CPF e senha baterem, senão None."""
+        visitante = self.visitantes.buscar_por("cpf", cpf)
+        if visitante is None:
+            return None
+        if visitante.senha != senha:
+            return None
+        return visitante
+
+    def autenticar_admin(self, usuario, senha):
+        """Retorna True se usuário e senha baterem com o admin hardcoded."""
+        return usuario == ADMIN_USUARIO and senha == ADMIN_SENHA
 
     def listar_visitantes(self):
         """Converte os visitantes da lista encadeada em uma lista comum para a GUI."""
@@ -95,7 +112,6 @@ class ParqueService:
         if atracao is None:
             return False, "Atração não encontrada."
 
-        # Filtra reservas ativas do visitante
         reservas_ativas = []
         atual = self.reservas.inicio
         while atual is not None:
@@ -104,12 +120,10 @@ class ParqueService:
                 reservas_ativas.append(r)
             atual = atual.proximo
 
-        # Regra 1: Conflito de Horário
         for r in reservas_ativas:
             if r.horario == horario:
                 return False, "Você já possui uma reserva ativa para este mesmo horário."
 
-        # Regra 2: Limite por Tipo de Passe (Normal: 1, Anual: 2, VIP: 3)
         tipo_passe = str(getattr(visitante, 'tipo_passe', 'Normal')).upper()
         if "VIP" in tipo_passe:
             limite = 3
@@ -121,12 +135,10 @@ class ParqueService:
         if len(reservas_ativas) >= limite:
             return False, f"Limite de reservas ativas atingido ({limite} para o passe {getattr(visitante, 'tipo_passe', 'Normal')})."
 
-        # Instancia, armazena e persiste no banco
         nova_reserva = Reserva(cpf_visitante=cpf, nome_atracao=atracao.nome, horario=horario)
         self.reservas.inserir(nova_reserva)
         db.salvar_reserva(nova_reserva)
 
-        # Adiciona à fila virtual da atração
         if hasattr(atracao, 'fila_virtual'):
             atracao.fila_virtual.enfileirar(visitante, atracao.aceita_prioridade)
 

@@ -7,6 +7,7 @@ from src.models.visitante import Visitante
 
 
 # Formato: (nome, idade, cpf, data_nascimento, email, tipo_passe, cartao)
+# Todos os visitantes do seed têm senha "12345".
 VISITANTES_SEED = [
     # --- Brasileiros ---
     ("João Pedro Almeida", 28, "11111111111", "15/03/1996", "joao.almeida@email.com", "VIP", "4111-1111-1111-1111"),
@@ -33,6 +34,8 @@ VISITANTES_SEED = [
     ("Emma Louise Parker", 27, "22022022022", "04/05/1997", "emma.parker@email.com", "Normal", ""),
 ]
 
+SENHA_PADRAO = "12345"
+
 
 def formatar_cpf(cpf):
     """Converte '11111111111' em '111.111.111-11' (mesmo padrão da GUI)."""
@@ -43,11 +46,11 @@ def popular():
     """Garante as tabelas e insere os visitantes fictícios no banco real."""
     db.criar_tabelas()
 
-    print(f"Inserindo {len(VISITANTES_SEED)} visitantes...")
+    print(f"Inserindo {len(VISITANTES_SEED)} visitantes (senha padrão: {SENHA_PADRAO})...")
 
     for nome, idade, cpf, data_nasc, email, tipo_passe, cartao in VISITANTES_SEED:
         cpf_formatado = formatar_cpf(cpf)
-        v = Visitante(nome, idade, cpf_formatado, data_nasc, email, tipo_passe, cartao)
+        v = Visitante(nome, idade, cpf_formatado, data_nasc, email, tipo_passe, cartao, SENHA_PADRAO)
         db.salvar_visitante(v)
         print(f"  ✓ {nome} ({tipo_passe}) — CPF {cpf_formatado}")
 
@@ -57,8 +60,9 @@ def popular():
         print(f"  - {v.nome} ({v.tipo_passe}) — CPF {v.cpf}")
 
     print(f"\nTotal: {len(visitantes)} visitantes.")
+    print(f"Senha de acesso de todos: {SENHA_PADRAO}")
 
 
 if __name__ == "__main__":
     popular()
-    print("\nSeed concluído. Rode .venv/bin/python -m src.main para ver na GUI.")
+    print("\nSeed concluído. Rode .venv/bin/python -m src.main para testar o login.")
