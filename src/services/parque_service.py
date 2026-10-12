@@ -72,6 +72,10 @@ class ParqueService:
             atual = atual.proximo
         return lista
 
+    def buscar_visitante_por_cpf(self, cpf):
+        """Busca um visitante cadastrado pelo seu CPF."""
+        return self.visitantes.buscar_por("cpf", cpf)
+
     def adicionar_visitante_na_fila(self, cpf, nome_atracao):
         """Valida visitante e atração e adiciona o visitante à fila."""
         visitante_encontrado = self.visitantes.buscar_por("cpf", cpf)
@@ -103,12 +107,28 @@ class ParqueService:
     # --- MÉTODOS DA ISSUE #10 (RESERVAS) ---
 
     def criar_reserva(self, cpf, nome_atracao, horario):
-        # 1. Encontrar o visitante
-        visitante = self.buscar_visitante_por_cpf(cpf)
-        if not visitante:
-            return "Erro: Visitante não encontrado."
+        """Valida regras de negócio e cria uma nova reserva.
 
-        # 2. Definir o limite de reservas com base no passe
+        Retorna (True, reserva) em caso de sucesso, ou (False, "mensagem").
+        """
+        visitante = self.visitantes.buscar_por("cpf", cpf)
+        if visitante is None:
+            return False, "Visitante não encontrado."
+
+        atracao = self.atracoes.buscar_por("nome", nome_atracao)
+        if atracao is None:
+            return False, "Atração não encontrada."
+
+        # Coleta reservas ativas do visitante
+        reservas_ativas = []
+        atual = self.reservas.inicio
+        while atual is not None:
+            r = atual.dado
+            if r.cpf_visitante == cpf and r.status == "Ativa":
+                reservas_ativas.append(r)
+            atual = atual.proximo
+
+        # Regra 1: limite por tipo de passe
         tipo_passe = str(visitante.tipo_passe).upper()
         if "VIP" in tipo_passe:
             limite = 3
@@ -117,99 +137,56 @@ class ParqueService:
         else:
             limite = 1
 
-        # 3. Filtrar as reservas ativas deste visitante (Blindado para List ou ListaEncadeada)
-        ativas = []
-        if isinstance(self.reservas, list):
-            ativas = [r for r in self.reservas if getattr(r, 'cpf_visitante', '') == cpf and getattr(r, 'status', '') == "Ativa"]
-        else:
-            atual = self.reservas.inicio
-            while atual is not None:
-                r = atual.dado
-                if getattr(r, 'cpf_visitante', '') == cpf and getattr(r, 'status', '') == "Ativa":
-                    ativas.append(r)
-                atual = atual.proximo
+        if len(reservas_ativas) >= limite:
+            return False, f"Limite de reservas ativas atingido ({limite} para o passe {visitante.tipo_passe})."
 
-        # 4. Validar Regra 1: Limite máximo
-        if len(ativas) >= limite:
-            return f"Erro: Limite de reservas ativas atingido ({limite} para passe {visitante.tipo_passe})."
+        # Regra 2: conflito de horário
+        for r in reservas_ativas:
+            if r.horario == horario:
+                return False, "Você já possui uma reserva ativa para este mesmo horário."
 
-        # 5. Validar Regra 2: Conflito de horário
-        for r in ativas:
-            if getattr(r, 'horario', '') == horario:
-                return "Erro: Já possui uma reserva ativa para este horário."
-
-        # 6. Criar, Adicionar na memória e Persistir
-        nova_reserva = Reserva(cpf, nome_atracao, horario)
-        
-        if isinstance(self.reservas, list):
-            self.reservas.append(nova_reserva)
-        else:
-            if hasattr(self.reservas, 'adicionar'):
-                self.reservas.adicionar(nova_reserva)
-            else:
-                self.reservas.append(nova_reserva)
-
-        # Envia o objeto inteiro para o banco (1 único argumento)
+        # Cria, armazena na ListaEncadeada e persiste
+        nova_reserva = Reserva(cpf_visitante=cpf, nome_atracao=atracao.nome, horario=horario)
+        self.reservas.inserir(nova_reserva)
         db.salvar_reserva(nova_reserva)
-        
-        return nova_reserva
-    def listar_reservas_do_visitante(self, cpf):
-        """Retorna as reservas de um visitante específico (aceita Lista ou ListaEncadeada)."""
-        reservas_encontradas = []
-        
-        # Se for uma lista normal do Python (ex: veio do banco de dados)
-        if isinstance(self.reservas, list):
-            for r in self.reservas:
-                if getattr(r, 'cpf_visitante', '') == cpf:
-                    reservas_encontradas.append(r)
-        
-        # Se for a estrutura customizada ListaEncadeada
-        else:
-            atual = self.reservas.inicio
-            while atual is not None:
-                reserva = atual.dado
-                if getattr(reserva, 'cpf_visitante', '') == cpf:
-                    reservas_encontradas.append(reserva)
-                atual = atual.proximo
-                
-        return reservas_encontradas
 
-    def cancelar_reserva(self, codigo):
-        """Cancela uma reserva no banco e na memória (aceita Lista ou ListaEncadeada)."""
-        # 1. Atualiza no banco de dados primeiro
-        from src.database import db
+        return True, nova_reserva
+
+    def listar_reservas_do_visitante(self, cpf):
+        """Retorna as reservas de um visitante específico."""
+        lista = []
+        atual = self.reservas.inicio
+        while atual is not None:
+            if atual.dado.cpf_visitante == cpf:
+                lista.append(atual.dado)
+            atual = atual.proximo
+        return lista
+
+    def cancelar_reserva(self, codigo, e_visitante=True):
+        """Cancela uma reserva existente e atualiza o banco.
+
+        Retorna (True, "mensagem") em caso de sucesso, ou (False, "mensagem").
+        """
+        if not e_visitante:
+            return False, "Apenas o visitante pode cancelar suas próprias reservas."
+
+        reserva_encontrada = self.reservas.buscar_por("codigo", codigo)
+        if reserva_encontrada is None:
+            return False, "Reserva não encontrada."
+
+        if reserva_encontrada.status == "Cancelada":
+            return False, "Esta reserva já está cancelada."
+
+        reserva_encontrada.cancelar()
         db.atualizar_status_reserva(codigo, "Cancelada")
-        
-        # 2. Atualiza na memória
-        if isinstance(self.reservas, list):
-            for reserva in self.reservas:
-                if getattr(reserva, 'codigo', '') == codigo:
-                    reserva.status = "Cancelada"
-                    return "Reserva cancelada com sucesso."
-        else:
-            no_atual = self.reservas.inicio
-            while no_atual is not None:
-                reserva = no_atual.dado
-                if getattr(reserva, 'codigo', '') == codigo:
-                    reserva.status = "Cancelada"
-                    return "Reserva cancelada com sucesso."
-                no_atual = no_atual.proximo
-                
-        return "Erro: Reserva não encontrada."
+
+        return True, "Reserva cancelada com sucesso."
 
     def listar_reservas(self):
-        # Força o sistema a ir buscar os dados atualizados ao banco sempre que a tela Admin abre
-        from src.database import db
-        self.reservas = db.carregar_reservas()
-        return self.reservas
-
-    def buscar_visitante_por_cpf(self, cpf):
-        """Busca um visitante cadastrado pelo seu CPF."""
-        # Usa a função de listar que já existe no seu serviço
-        visitantes = self.listar_visitantes() 
-        
-        for visitante in visitantes:
-            if visitante.cpf == cpf:
-                return visitante
-                
-        return None
+        """Retorna todas as reservas registradas (para uso do painel admin)."""
+        lista = []
+        atual = self.reservas.inicio
+        while atual is not None:
+            lista.append(atual.dado)
+            atual = atual.proximo
+        return lista
