@@ -1,6 +1,7 @@
 from src.structures.lista_encadeada import ListaEncadeada
 from src.models.visitante import Visitante
 from src.models.atracao import Atracao
+from src.models.reserva import Reserva
 from src.database import db
 
 
@@ -9,6 +10,7 @@ class ParqueService:
         """Inicializa as listas encadeadas e carrega os dados persistidos."""
         self.visitantes = ListaEncadeada()
         self.atracoes = ListaEncadeada()
+        self.reservas = ListaEncadeada()
 
         db.criar_tabelas()
 
@@ -17,6 +19,9 @@ class ParqueService:
 
         for a in db.carregar_atracoes():
             self.atracoes.inserir(a)
+
+        for r in db.carregar_reservas():
+            self.reservas.inserir(r)
 
     def cadastrar_visitante(self, nome, idade, cpf, data_nascimento, email, tipo_passe, cartao=""):
         """Cria um visitante, armazena-o em memória e persiste no banco."""
@@ -52,7 +57,6 @@ class ParqueService:
 
     def adicionar_visitante_na_fila(self, cpf, nome_atracao):
         """Valida visitante e atração e adiciona o visitante à fila."""
-
         visitante_encontrado = self.visitantes.buscar_por("cpf", cpf)
 
         if visitante_encontrado is None:
@@ -78,3 +82,88 @@ class ParqueService:
             f"Sucesso: {visitante_encontrado.nome} entrou na fila "
             f"para {atracao_encontrada.nome}!"
         )
+
+    # --- MÉTODOS DA ISSUE #10 (RESERVAS) ---
+
+    def criar_reserva(self, cpf, nome_atracao, horario):
+        """Valida regras de negócio e cria uma nova reserva."""
+        visitante = self.visitantes.buscar_por("cpf", cpf)
+        if visitante is None:
+            return False, "Visitante não encontrado."
+
+        atracao = self.atracoes.buscar_por("nome", nome_atracao)
+        if atracao is None:
+            return False, "Atração não encontrada."
+
+        # Filtra reservas ativas do visitante
+        reservas_ativas = []
+        atual = self.reservas.inicio
+        while atual is not None:
+            r = atual.dado
+            if r.cpf_visitante == cpf and r.status == "Ativa":
+                reservas_ativas.append(r)
+            atual = atual.proximo
+
+        # Regra 1: Conflito de Horário
+        for r in reservas_ativas:
+            if r.horario == horario:
+                return False, "Você já possui uma reserva ativa para este mesmo horário."
+
+        # Regra 2: Limite por Tipo de Passe (Normal: 1, Anual: 2, VIP: 3)
+        tipo_passe = str(getattr(visitante, 'tipo_passe', 'Normal')).upper()
+        if "VIP" in tipo_passe:
+            limite = 3
+        elif "ANUAL" in tipo_passe:
+            limite = 2
+        else:
+            limite = 1
+
+        if len(reservas_ativas) >= limite:
+            return False, f"Limite de reservas ativas atingido ({limite} para o passe {getattr(visitante, 'tipo_passe', 'Normal')})."
+
+        # Instancia, armazena e persiste no banco
+        nova_reserva = Reserva(cpf_visitante=cpf, nome_atracao=atracao.nome, horario=horario)
+        self.reservas.inserir(nova_reserva)
+        db.salvar_reserva(nova_reserva)
+
+        # Adiciona à fila virtual da atração
+        if hasattr(atracao, 'fila_virtual'):
+            atracao.fila_virtual.enfileirar(visitante, atracao.aceita_prioridade)
+
+        return True, nova_reserva
+
+    def listar_reservas_do_visitante(self, cpf):
+        """Retorna a lista de reservas atreladas ao CPF informado."""
+        lista = []
+        atual = self.reservas.inicio
+        while atual is not None:
+            if atual.dado.cpf_visitante == cpf:
+                lista.append(atual.dado)
+            atual = atual.proximo
+        return lista
+
+    def cancelar_reserva(self, codigo, e_visitante=True):
+        """Cancela uma reserva existente e atualiza o banco de dados."""
+        if not e_visitante:
+            return False, "Apenas o visitante pode cancelar suas próprias reservas."
+
+        reserva_encontrada = self.reservas.buscar_por("codigo", codigo)
+        if reserva_encontrada is None:
+            return False, "Reserva não encontrada."
+
+        if reserva_encontrada.status == "Cancelada":
+            return False, "Esta reserva já está cancelada."
+
+        reserva_encontrada.cancelar()
+        db.atualizar_status_reserva(codigo, "Cancelada")
+
+        return True, "Reserva cancelada com sucesso."
+
+    def listar_reservas(self):
+        """Retorna todas as reservas registradas no sistema (para uso do painel admin)."""
+        lista = []
+        atual = self.reservas.inicio
+        while atual is not None:
+            lista.append(atual.dado)
+            atual = atual.proximo
+        return lista
