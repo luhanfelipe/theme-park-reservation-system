@@ -25,7 +25,8 @@ def criar_tabelas():
                 data_nascimento TEXT NOT NULL,
                 email TEXT NOT NULL,
                 tipo_passe TEXT NOT NULL,
-                cartao TEXT DEFAULT ''
+                cartao TEXT DEFAULT '',
+                senha TEXT DEFAULT ''
             )
         """)
         conn.execute("""
@@ -46,8 +47,8 @@ def salvar_visitante(visitante):
     with conectar() as conn:
         conn.execute("""
             INSERT OR IGNORE INTO visitantes
-                (cpf, nome, idade, data_nascimento, email, tipo_passe, cartao)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+                (cpf, nome, idade, data_nascimento, email, tipo_passe, cartao, senha)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             visitante.cpf,
             visitante.nome,
@@ -55,7 +56,8 @@ def salvar_visitante(visitante):
             visitante.data_nascimento,
             visitante.email,
             visitante.tipo_passe,
-            getattr(visitante, "cartao", "") or ""
+            getattr(visitante, "cartao", "") or "",
+            getattr(visitante, "senha", "") or ""
         ))
         conn.commit()
 
@@ -82,12 +84,12 @@ def carregar_visitantes():
     """Retorna uma lista de objetos Visitante vindos do banco."""
     with conectar() as conn:
         cursor = conn.execute("""
-            SELECT nome, idade, cpf, data_nascimento, email, tipo_passe, cartao
+            SELECT nome, idade, cpf, data_nascimento, email, tipo_passe, cartao, senha
             FROM visitantes
         """)
         return [
-            Visitante(nome, idade, cpf, data_nascimento, email, tipo_passe, cartao or "")
-            for (nome, idade, cpf, data_nascimento, email, tipo_passe, cartao) in cursor.fetchall()
+            Visitante(nome, idade, cpf, data_nascimento, email, tipo_passe, cartao or "", senha or "")
+            for (nome, idade, cpf, data_nascimento, email, tipo_passe, cartao, senha) in cursor.fetchall()
         ]
 
 

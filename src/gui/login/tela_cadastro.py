@@ -102,6 +102,12 @@ class TelaCadastro(ctk.CTkScrollableFrame):
         self.combo_passe.grid(row=5, column=1, padx=15, pady=(0, 10))
         self.combo_passe.set("Normal")
 
+        # Campo Senha
+        self.lbl_senha = ctk.CTkLabel(self.frame_form, text="Senha de Acesso:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
+        self.lbl_senha.grid(row=8, column=0, sticky="w", padx=15, pady=(5, 2))
+        self.entry_senha = ctk.CTkEntry(self.frame_form, placeholder_text="•••••", width=220, fg_color=COR_INPUT_BG, border_color="#374151", show="*")
+        self.entry_senha.grid(row=9, column=0, padx=15, pady=(0, 10))
+
         # --- DADOS BANCÁRIOS---
 
         self.lbl_num_cartao = ctk.CTkLabel(self.frame_form, text="Número do Cartão (Opcional):", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
@@ -133,10 +139,10 @@ class TelaCadastro(ctk.CTkScrollableFrame):
             command=self.salvar_visitante
         )
 
-        self.btn_salvar.grid(row=8, column=0, columnspan=2, pady=(15, 15))
+        self.btn_salvar.grid(row=10, column=0, columnspan=2, pady=(15, 15))
 
         self.lbl_mensagem = ctk.CTkLabel(self.frame_form, text="", font=ctk.CTkFont(size=12, weight="bold"))
-        self.lbl_mensagem.grid(row=9, column=0, columnspan=2, pady=(0, 10))
+        self.lbl_mensagem.grid(row=11, column=0, columnspan=2, pady=(0, 10))
 
         # --- LISTAGEM DE VISITANTES ---
         self.lbl_lista = ctk.CTkLabel(self, text=" 👤 Visitantes Cadastrados", font=ctk.CTkFont(size=16, weight="bold"), text_color=COR_TEXTO)
@@ -194,6 +200,7 @@ class TelaCadastro(ctk.CTkScrollableFrame):
         num_cartao = self.entry_num_cartao.get()
         val_cartao = self.entry_val_cartao.get()
         cvc_cartao = self.entry_cvc_cartao.get()
+        senha = self.entry_senha.get()
 
         if not nome or not idade or not cpf:
             self.lbl_mensagem.configure(text="⚠ Preencha pelo menos Nome, Idade e CPF!", text_color="#f87171")
@@ -212,7 +219,7 @@ class TelaCadastro(ctk.CTkScrollableFrame):
         if num_cartao or val_cartao or cvc_cartao:
             cartao_formatado = f"Num: {num_cartao} | Val: {val_cartao} | CVC: {cvc_cartao}"
 
-        msg = self.servico.cadastrar_visitante(nome, idade, cpf, data, email, passe, cartao_formatado)
+        msg = self.servico.cadastrar_visitante(nome, idade, cpf, data, email, passe, cartao_formatado, senha)
         self.lbl_mensagem.configure(text=f"✓ {msg}", text_color="#34d399")
 
         # Limpar os campos
@@ -224,6 +231,7 @@ class TelaCadastro(ctk.CTkScrollableFrame):
         self.entry_num_cartao.delete(0, 'end')
         self.entry_val_cartao.delete(0, 'end')
         self.entry_cvc_cartao.delete(0, 'end')
+        self.entry_senha.delete(0, 'end')
         self.combo_passe.set("Normal")
 
         self.atualizar_lista()
