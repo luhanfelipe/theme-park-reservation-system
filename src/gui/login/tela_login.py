@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from src.utils.formatadores import formatar_cpf
 
 
 class TelaLogin(ctk.CTkFrame):
@@ -44,6 +45,8 @@ class TelaLogin(ctk.CTkFrame):
 
         self.entry_cpf = ctk.CTkEntry(aba, placeholder_text="CPF (000.000.000-00)", width=260)
         self.entry_cpf.pack(pady=(20, 10))
+        self.entry_cpf.bind("<KeyRelease>", self._limitar_cpf_login)
+        self.entry_cpf.bind("<FocusOut>", self._formatar_cpf_login)
 
         self.entry_senha_visitante = ctk.CTkEntry(aba, placeholder_text="Senha", width=260, show="*")
         self.entry_senha_visitante.pack(pady=10)
@@ -99,6 +102,27 @@ class TelaLogin(ctk.CTkFrame):
 
         self.lbl_msg_admin = ctk.CTkLabel(aba, text="", text_color="red")
         self.lbl_msg_admin.pack(pady=(0, 10))
+
+    # ------------------------------------------------------------------
+    # FORMATAÇÃO E LIMITAÇÃO DE CPF
+    # ------------------------------------------------------------------
+    def _limitar_cpf_login(self, event=None):
+        """Impede que o campo CPF passe de 11 dígitos enquanto digita."""
+        texto = self.entry_cpf.get()
+        apenas_numeros = "".join(filter(str.isdigit, texto))
+        if len(apenas_numeros) > 11:
+            apenas_numeros = apenas_numeros[:11]
+        if texto != apenas_numeros:
+            self.entry_cpf.delete(0, "end")
+            self.entry_cpf.insert(0, apenas_numeros)
+
+    def _formatar_cpf_login(self, event=None):
+        """Formata o CPF ao sair do campo (perde foco)."""
+        texto_atual = self.entry_cpf.get()
+        formatado = formatar_cpf(texto_atual)
+        if formatado != texto_atual:
+            self.entry_cpf.delete(0, "end")
+            self.entry_cpf.insert(0, formatado)
 
     # ------------------------------------------------------------------
     # LOGIN VISITANTE
