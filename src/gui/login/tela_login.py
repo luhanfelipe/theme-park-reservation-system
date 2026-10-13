@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from src.utils.formatadores import formatar_cpf
 from src.gui.componentes.tema import (
-    COR_BOTAO_ROXO, COR_HOVER_ROXO, COR_FUNDO_APP,
+    COR_BOTAO, COR_BOTAO_HOVER, COR_FUNDO_APP,
     COR_ERRO, COR_SUCESSO, carregar_fundo,
 )
 
@@ -15,7 +15,7 @@ class TelaLogin(ctk.CTkFrame):
         self.on_ir_para_cadastro = on_ir_para_cadastro
 
         # --- Imagem de fundo ---
-        self._fundo_img = carregar_fundo((900, 600))
+        self._fundo_img = carregar_fundo((1100, 650))
         if self._fundo_img is not None:
             self._label_fundo = ctk.CTkLabel(self, image=self._fundo_img, text="")
             self._label_fundo.place(x=0, y=0, relwidth=1, relheight=1)
@@ -26,7 +26,7 @@ class TelaLogin(ctk.CTkFrame):
 
         self.lbl_titulo = ctk.CTkLabel(
             self.frame_login,
-            text="Login do Sistema",
+            text="Bem-Vindo(a)",
             font=("Arial", 24, "bold")
         )
         self.lbl_titulo.pack(pady=(30, 20), padx=40)
@@ -58,8 +58,8 @@ class TelaLogin(ctk.CTkFrame):
             aba,
             text="Entrar",
             width=260,
-            fg_color=COR_BOTAO_ROXO,
-            hover_color=COR_HOVER_ROXO,
+            fg_color=COR_BOTAO,
+            hover_color=COR_BOTAO_HOVER,
             command=self.fazer_login_visitante
         )
         self.btn_entrar_visitante.pack(pady=(15, 10))
@@ -69,8 +69,8 @@ class TelaLogin(ctk.CTkFrame):
             text="Não tem conta? Cadastre-se",
             width=260,
             fg_color="transparent",
-            hover_color="#2A2D3E",
-            text_color="#A0A0A0",
+            hover_color="#2A1F18",
+            text_color="#C4B5A8",
             command=self.on_ir_para_cadastro
         )
         self.btn_cadastrar.pack(pady=(0, 10))
@@ -98,8 +98,8 @@ class TelaLogin(ctk.CTkFrame):
             aba,
             text="Entrar como Admin",
             width=260,
-            fg_color=COR_BOTAO_ROXO,
-            hover_color=COR_HOVER_ROXO,
+            fg_color=COR_BOTAO,
+            hover_color=COR_BOTAO_HOVER,
             command=self.fazer_login_admin
         )
         self.btn_entrar_admin.pack(pady=(15, 10))

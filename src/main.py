@@ -1,5 +1,9 @@
 import customtkinter as ctk
 from src.services.parque_service import ParqueService
+from src.gui.componentes.tema import (
+    COR_FUNDO_APP, COR_MENU, COR_BOTAO, COR_BOTAO_HOVER,
+    COR_VERMELHO, COR_HOVER_VERMELHO, COR_TEXTO,
+)
 
 # Telas de Login e Cadastro
 from src.gui.login.tela_cadastro import TelaCadastro
@@ -15,6 +19,7 @@ from src.gui.visitante.tela_reservas import TelaReservas
 from src.gui.visitante.tela_minhas_filas import TelaMinhasFilas
 from src.gui.visitante.tela_home_visitante import TelaHomeVisitante
 
+
 class AppParque(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -22,14 +27,6 @@ class AppParque(ctk.CTk):
         self.servico = ParqueService()
         self.title("Sistema de Reservas - Parque Temático")
         self.geometry("1100x650")
-
-        # Cores da interface
-        COR_FUNDO_APP = "#1F1D2B"
-        COR_MENU = "#252836"
-        self.COR_BOTAO_ROXO = "#6C63FF"
-        COR_HOVER_ROXO = "#5A52D5"
-        COR_VERMELHO = "#ef4444"
-        COR_HOVER_VERMELHO = "#7f1d1d"
 
         self.configure(fg_color=COR_FUNDO_APP)
 
@@ -54,7 +51,11 @@ class AppParque(ctk.CTk):
         # --- FRAME DO MENU LATERAL (Aberto) ---
         self.frame_menu = ctk.CTkFrame(self, width=220, corner_radius=0, fg_color=COR_MENU)
 
-        self.label_logo = ctk.CTkLabel(self.frame_menu, text="Menu Parque", font=ctk.CTkFont(size=20, weight="bold"), text_color="#FFFFFF")
+        self.label_logo = ctk.CTkLabel(
+            self.frame_menu, text="Menu Parque",
+            font=ctk.CTkFont(size=20, weight="bold"),
+            text_color=COR_TEXTO
+        )
         self.label_logo.pack(pady=(30, 20))
 
         # Sub-frame apenas para guardar os botões dinâmicos (facilita limpar)
@@ -63,8 +64,9 @@ class AppParque(ctk.CTk):
 
         # Botão de Logout fixo em baixo
         self.btn_logout = ctk.CTkButton(
-            self.frame_menu, text="Sair da Sessão", fg_color=COR_VERMELHO,
-            hover_color=COR_HOVER_VERMELHO, command=self.fazer_logout
+            self.frame_menu, text="Sair da Sessão",
+            fg_color=COR_VERMELHO, hover_color=COR_HOVER_VERMELHO,
+            command=self.fazer_logout
         )
         self.btn_logout.pack(side="bottom", pady=30, padx=20)
 
@@ -90,7 +92,7 @@ class AppParque(ctk.CTk):
         for btn in self.botoes_menu:
             btn.configure(fg_color="transparent")
         if botao_selecionado:
-            botao_selecionado.configure(fg_color=self.COR_BOTAO_ROXO)
+            botao_selecionado.configure(fg_color=COR_BOTAO)
 
     def limpar_frame_principal(self):
         for widget in self.frame_principal.winfo_children():
@@ -99,7 +101,7 @@ class AppParque(ctk.CTk):
     def criar_botao_menu(self, texto, comando):
         btn = ctk.CTkButton(
             self.frame_botoes, text=texto, fg_color="transparent",
-            text_color="#FFFFFF", hover_color="#5A52D5", anchor="w",
+            text_color=COR_TEXTO, hover_color=COR_BOTAO_HOVER, anchor="w",
             command=lambda: comando(btn)
         )
         btn.pack(pady=10, padx=20, fill="x")
@@ -152,14 +154,14 @@ class AppParque(ctk.CTk):
             btn_home = self.criar_botao_menu("📊 Dashboard", self.abrir_tela_home)
             self.criar_botao_menu("🎢 Gerir Atrações", self.abrir_tela_atracao)
             self.criar_botao_menu("⧖ Fila Virtual", self.abrir_tela_fila)
-            self.abrir_tela_home(btn_home) # Vai direto para a Home
+            self.abrir_tela_home(btn_home)  # Vai direto para a Home
 
         elif perfil == "visitante":
             self.label_logo.configure(text="Painel Visitante")
             btn_home = self.criar_botao_menu("🏠 Início", self.abrir_tela_home_visitante)
             self.criar_botao_menu("🎡 Reservar Atração", self.abrir_tela_reservas)
             self.criar_botao_menu("📋 Minhas Filas", self.abrir_tela_minhas_filas)
-            self.abrir_tela_home_visitante(btn_home) # Vai direto para a Dashboard Visitante
+            self.abrir_tela_home_visitante(btn_home)  # Vai direto para a Dashboard Visitante
 
     # ==========================================
     # ROTAS DO ADMINISTRADOR
@@ -198,10 +200,11 @@ class AppParque(ctk.CTk):
         if btn: self.atualizar_botao_ativo(btn)
 
     def abrir_tela_home_visitante(self, btn=None):
-            self.limpar_frame_principal()
-            tela = TelaHomeVisitante(self.frame_principal, self.servico, self.usuario_logado["cpf"])
-            tela.pack(fill="both", expand=True)
-            if btn: self.atualizar_botao_ativo(btn)
+        self.limpar_frame_principal()
+        tela = TelaHomeVisitante(self.frame_principal, self.servico, self.usuario_logado["cpf"])
+        tela.pack(fill="both", expand=True)
+        if btn: self.atualizar_botao_ativo(btn)
+
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("Dark")

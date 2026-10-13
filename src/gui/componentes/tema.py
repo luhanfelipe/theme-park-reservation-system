@@ -3,26 +3,31 @@ from PIL import Image
 from customtkinter import CTkImage
 
 
-# --- Cores do sistema ---
-COR_FUNDO_APP = "#1F1D2B"
-COR_MENU = "#252836"
-COR_CARD = "#2A2D3E"
-COR_INPUT = "#1F1D2B"
+# --- Cores do sistema (paleta quente combinando com a imagem de fundo) ---
+COR_FUNDO_APP = "#1A1410"          # Fundo escuro com toque quente (marrom profundo)
+COR_MENU = "#241A14"               # Menu lateral
+COR_CARD = "#2A1F18"               # Cards
+COR_INPUT = "#1A1410"              # Inputs
 
-COR_BOTAO_ROXO = "#6C63FF"
-COR_HOVER_ROXO = "#5A52D5"
-COR_BORDA_NEON = "#5A52D5"
+# Botões principais (laranja queimado)
+COR_BOTAO = "#E8734A"
+COR_BOTAO_HOVER = "#C25B3A"
+COR_BORDA_NEON = "#C25B3A"
 
+# Botões de perigo (vermelho escuro)
 COR_VERMELHO = "#C9302C"
 COR_HOVER_VERMELHO = "#AC2925"
 
+# Textos
 COR_TEXTO = "#FFFFFF"
-COR_TEXTO_SEC = "#A0A0A0"
+COR_TEXTO_SEC = "#C4B5A8"          # Cinza quente
 
-COR_SUCESSO = "#34d399"
-COR_ERRO = "#f87171"
+# Semânticas
+COR_SUCESSO = "#4ADE80"
+COR_ERRO = "#F87171"
 COR_VIP = "#FFD700"
-COR_ANUAL = "#38bdf8"
+COR_ANUAL = "#FBBF24"              # Âmbar (combina com quente)
+COR_DOURADO = "#F5A623"            # Laranja dourado
 
 
 # --- Imagem de fundo ---
