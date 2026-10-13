@@ -6,19 +6,20 @@ O sistema tem como objetivo simular o gerenciamento de um parque temático, perm
 
 ## 📌 Sobre o projeto
 
-A aplicação será desenvolvida em **Python** e contará com uma **interface gráfica utilizando CustomTkinter**.
+A aplicação foi desenvolvida em **Python** com **interface gráfica em CustomTkinter** e **persistência em SQLite**.
 
-Entre as principais funcionalidades previstas estão:
+Funcionalidades implementadas:
 
 * gerenciamento de atrações;
-* cadastro e gerenciamento de visitantes;
-* criação e gerenciamento de reservas;
+* cadastro e autocadastro de visitantes;
+* criação e cancelamento de reservas;
 * filas virtuais para as atrações;
-* tratamento de prioridades nas filas;
-* consulta da posição dos visitantes;
-* painel de controle para administração do parque;
-* portal para interação dos visitantes;
-* apresentação de métricas do funcionamento do sistema.
+* prioridade de atendimento por tipo de passe (VIP > Anual > Normal);
+* autenticação separada para visitante e administrador;
+* painel de controle com métricas do parque;
+* portal do visitante (reservas e minhas filas).
+
+> Os dados de demonstração são baseados no **Thorpe Park** (Inglaterra), parque temático real especializado em atrações de terror.
 
 ## 🧩 Estruturas de Dados
 
@@ -37,16 +38,20 @@ A implementação deverá respeitar as regras da atividade, evitando utilizar di
 O projeto está organizado para separar as principais responsabilidades da aplicação:
 
 src/
-├── gui/          # Interface gráfica (telas)
-├── models/       # Classes e entidades do sistema
-├── services/     # Regras e operações do sistema
-├── structures/   # Estruturas de dados implementadas pelo grupo
-├── database/     # Persistência em SQLite
-└── main.py       # Ponto de entrada da aplicação
+├── gui/
+│   ├── administrador/   # Telas do administrador
+│   ├── login/           # Login e autocadastro
+│   └── visitante/       # Telas do visitante logado
+├── models/              # Classes e entidades do sistema
+├── services/            # Regras e operações do sistema
+├── structures/          # Estruturas de dados implementadas pelo grupo
+├── database/            # Persistência em SQLite
+├── utils/               # Funções auxiliares (ex.: formatar CPF)
+└── main.py              # Ponto de entrada da aplicação
 
-tests/            # Testes manuais + seeds de dados
-data/             # Banco de dados SQLite (não versionado)
-docs/             # Documentação
+tests/                   # Testes automatizados + seeds de dados
+data/                    # Banco de dados SQLite (não versionado)
+docs/                    # Documentação
 
 ## 🚀 Como rodar o projeto
 
@@ -80,6 +85,17 @@ python -m src.main
 
 Uma janela de login deve abrir. Use as credenciais fornecidas na disciplina ou as definidas em src/gui/tela_login.py.
 
+## 🔐 Credenciais de acesso
+
+**Administrador:**
+* Usuário: `admin`
+* Senha: `admin123`
+
+**Visitante (após rodar o `seed_visitantes`):**
+* CPF: `111.111.111-11`
+* Senha: `12345`
+
+> Todos os 20 visitantes do seed usam a mesma senha padrão: `12345`.
 
 ## 🌱 Popular o banco com dados reais
 O sistema começa com o banco vazio. Para carregar os dados de demonstração do Thorpe Park (parque temático real no Reino Unido), rode os dois seeds:
@@ -109,7 +125,22 @@ Isso insere 20 visitantes fictícios (10 brasileiros e 10 gringos), com passes v
 
 ## 🚧 Status
 
-**Em desenvolvimento ativo.**
+**Funcional.** Todas as funcionalidades principais estão implementadas e testadas.
+
+Já implementado:
+
+* Modelos de visitante, atração e reserva;
+* Lista encadeada e fila de prioridade implementadas do zero pelo grupo;
+* Serviço central (`ParqueService`) com regras de negócio (limite de reservas por passe, conflito de horário, prioridade VIP > Anual > Normal);
+* Autenticação de visitante (CPF + senha) e admin (credenciais fixas);
+* Autocadastro de visitante pela tela de login;
+* Interface gráfica com telas separadas para admin e visitante:
+  * **Admin:** dashboard de métricas, gestão de atrações, operação das filas virtuais.
+  * **Visitante:** dashboard pessoal, reservar atrações, minhas filas.
+* Persistência completa em SQLite (visitantes, atrações e reservas);
+* 35 cenários de teste automatizados (lista, fila, service, banco e reservas).
+
+Melhorias futuras (fora do escopo atual): histórico detalhado de visitas, gráficos analíticos, notificações em tempo real.
 
 Já implementado:
 
