@@ -2,7 +2,7 @@ import customtkinter as ctk
 from src.gui.componentes.tema import (
     COR_FUNDO_APP, COR_CARD, COR_INPUT, COR_TEXTO, COR_TEXTO_SEC,
     COR_BOTAO, COR_BOTAO_HOVER, COR_BORDA_NEON,
-    COR_SUCESSO, COR_ERRO, COR_VIP, carregar_fundo,
+    COR_SUCESSO, COR_ERRO, COR_VIP,
 )
 
 
@@ -12,12 +12,6 @@ class TelaAtracao(ctk.CTkScrollableFrame):
 
         self._scrollbar.grid_forget()
         self.servico = servico
-
-        # --- Imagem de fundo ---
-        self._fundo_img = carregar_fundo((1100, 650))
-        if self._fundo_img is not None:
-            self._label_fundo = ctk.CTkLabel(self, image=self._fundo_img, text="")
-            self._label_fundo.place(x=0, y=0, relwidth=1, relheight=1)
 
         # --- BOTÃO VOLTAR ---
         self.btn_voltar = ctk.CTkButton(

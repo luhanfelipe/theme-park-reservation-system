@@ -2,7 +2,7 @@ import customtkinter as ctk
 from src.gui.componentes.tema import (
     COR_FUNDO_APP, COR_CARD, COR_INPUT, COR_TEXTO, COR_TEXTO_SEC,
     COR_BOTAO, COR_BOTAO_HOVER, COR_BORDA_NEON,
-    COR_SUCESSO, COR_ERRO, COR_VIP, COR_ANUAL, carregar_fundo,
+    COR_SUCESSO, COR_ERRO, COR_VIP, COR_ANUAL,
 )
 
 
@@ -12,12 +12,6 @@ class TelaFila(ctk.CTkScrollableFrame):
 
         self._scrollbar.grid_forget()
         self.servico = servico
-
-        # --- Imagem de fundo ---
-        self._fundo_img = carregar_fundo((1100, 650))
-        if self._fundo_img is not None:
-            self._label_fundo = ctk.CTkLabel(self, image=self._fundo_img, text="")
-            self._label_fundo.place(x=0, y=0, relwidth=1, relheight=1)
 
         # --- BOTÃO VOLTAR ---
         self.btn_voltar = ctk.CTkButton(
@@ -48,14 +42,12 @@ class TelaFila(ctk.CTkScrollableFrame):
         )
         self.frame_form.pack(pady=10, padx=20, anchor="center")
 
-        # Campo CPF
         self.lbl_cpf = ctk.CTkLabel(self.frame_form, text="CPF do Visitante:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
         self.lbl_cpf.grid(row=0, column=0, sticky="w", padx=15, pady=(12, 2))
         self.entry_cpf = ctk.CTkEntry(self.frame_form, placeholder_text="00000000000", width=220, fg_color=COR_INPUT, border_color="#374151")
         self.entry_cpf.grid(row=1, column=0, padx=15, pady=(0, 10))
         self.entry_cpf.bind("<KeyRelease>", self.limitar_cpf)
 
-        # Combo Atração
         self.lbl_atracao = ctk.CTkLabel(self.frame_form, text="Selecione a Atração:", font=ctk.CTkFont(size=12, weight="bold"), text_color=COR_TEXTO_SEC)
         self.lbl_atracao.grid(row=0, column=1, sticky="w", padx=15, pady=(12, 2))
         self.combo_atracao = ctk.CTkComboBox(
@@ -66,7 +58,6 @@ class TelaFila(ctk.CTkScrollableFrame):
         )
         self.combo_atracao.grid(row=1, column=1, padx=15, pady=(0, 10))
 
-        # Botão Adicionar
         self.btn_adicionar = ctk.CTkButton(
             self.frame_form, text=" + Adicionar à Fila",
             fg_color=COR_BOTAO, hover_color=COR_BOTAO_HOVER,
