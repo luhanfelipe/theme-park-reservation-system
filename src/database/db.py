@@ -3,10 +3,10 @@ import sqlite3
 
 from src.models.visitante import Visitante
 from src.models.atracao import Atracao
+from src.models.reserva import Reserva
 
 
 CAMINHO_BANCO = os.path.join("data", "parque.db")
-
 
 def conectar():
     """Abre conexão com o banco. Cria a pasta data/ se ela não existir."""
@@ -15,7 +15,7 @@ def conectar():
 
 
 def criar_tabelas():
-    """Cria as tabelas visitantes e atracoes se ainda não existirem."""
+    """Cria as tabelas visitantes, atracoes e reservas se ainda não existirem."""
     with conectar() as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS visitantes (
@@ -25,7 +25,8 @@ def criar_tabelas():
                 data_nascimento TEXT NOT NULL,
                 email TEXT NOT NULL,
                 tipo_passe TEXT NOT NULL,
-                cartao TEXT DEFAULT ''
+                cartao TEXT DEFAULT '',
+                senha TEXT DEFAULT ''
             )
         """)
         conn.execute("""
@@ -38,6 +39,15 @@ def criar_tabelas():
                 aceita_prioridade INTEGER NOT NULL
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS reservas (
+                codigo TEXT PRIMARY KEY,
+                cpf_visitante TEXT NOT NULL,
+                nome_atracao TEXT NOT NULL,
+                horario TEXT NOT NULL,
+                status TEXT NOT NULL
+            )
+        """)
         conn.commit()
 
 
@@ -46,8 +56,8 @@ def salvar_visitante(visitante):
     with conectar() as conn:
         conn.execute("""
             INSERT OR IGNORE INTO visitantes
-                (cpf, nome, idade, data_nascimento, email, tipo_passe, cartao)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+                (cpf, nome, idade, data_nascimento, email, tipo_passe, cartao, senha)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             visitante.cpf,
             visitante.nome,
@@ -55,7 +65,8 @@ def salvar_visitante(visitante):
             visitante.data_nascimento,
             visitante.email,
             visitante.tipo_passe,
-            getattr(visitante, "cartao", "") or ""
+            getattr(visitante, "cartao", "") or "",
+            getattr(visitante, "senha", "") or ""
         ))
         conn.commit()
 
@@ -78,16 +89,44 @@ def salvar_atracao(atracao):
         conn.commit()
 
 
+def salvar_reserva(reserva):
+    """Insere uma reserva no banco."""
+    with conectar() as conn:
+        conn.execute("""
+            INSERT OR IGNORE INTO reservas
+                (codigo, cpf_visitante, nome_atracao, horario, status)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            reserva.codigo,
+            reserva.cpf_visitante,
+            reserva.nome_atracao,
+            reserva.horario,
+            reserva.status
+        ))
+        conn.commit()
+
+
+def atualizar_status_reserva(codigo, novo_status):
+    """Atualiza o status de uma reserva específica pelo código."""
+    with conectar() as conn:
+        conn.execute("""
+            UPDATE reservas
+            SET status = ?
+            WHERE codigo = ?
+        """, (novo_status, codigo))
+        conn.commit()
+
+
 def carregar_visitantes():
     """Retorna uma lista de objetos Visitante vindos do banco."""
     with conectar() as conn:
         cursor = conn.execute("""
-            SELECT nome, idade, cpf, data_nascimento, email, tipo_passe, cartao
+            SELECT nome, idade, cpf, data_nascimento, email, tipo_passe, cartao, senha
             FROM visitantes
         """)
         return [
-            Visitante(nome, idade, cpf, data_nascimento, email, tipo_passe, cartao or "")
-            for (nome, idade, cpf, data_nascimento, email, tipo_passe, cartao) in cursor.fetchall()
+            Visitante(nome, idade, cpf, data_nascimento, email, tipo_passe, cartao or "", senha or "")
+            for (nome, idade, cpf, data_nascimento, email, tipo_passe, cartao, senha) in cursor.fetchall()
         ]
 
 
@@ -101,4 +140,23 @@ def carregar_atracoes():
         return [
             Atracao(nome, tipo, capacidade, idade_minima, horario, bool(aceita_prioridade))
             for (nome, tipo, capacidade, idade_minima, horario, aceita_prioridade) in cursor.fetchall()
+        ]
+
+
+def carregar_reservas():
+    """Retorna uma lista de objetos Reserva vindos do banco."""
+    with conectar() as conn:
+        cursor = conn.execute("""
+            SELECT codigo, cpf_visitante, nome_atracao, horario, status
+            FROM reservas
+        """)
+        return [
+            Reserva(
+                cpf_visitante=cpf_visitante,
+                nome_atracao=nome_atracao,
+                horario=horario,
+                status=status,
+                codigo=codigo
+            )
+            for (codigo, cpf_visitante, nome_atracao, horario, status) in cursor.fetchall()
         ]
