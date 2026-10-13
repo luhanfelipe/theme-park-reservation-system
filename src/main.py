@@ -21,7 +21,7 @@ class AppParque(ctk.CTk):
 
         self.servico = ParqueService()
         self.title("Sistema de Reservas - Parque Temático")
-        self.geometry("1100x650") # Aumentei um pouco para caber melhor os cartões
+        self.geometry("1100x650")
 
         # Cores da interface
         COR_FUNDO_APP = "#1F1D2B"
@@ -46,14 +46,14 @@ class AppParque(ctk.CTk):
         # --- BARRA LATERAL FINA (Botão Hambúrguer) ---
         self.frame_fino = ctk.CTkFrame(self, width=50, corner_radius=0, fg_color=COR_MENU)
         self.btn_hamburguer = ctk.CTkButton(
-            self.frame_fino, text="☰", width=40, height=40, font=("Arial", 24), 
+            self.frame_fino, text="☰", width=40, height=40, font=("Arial", 24),
             fg_color="transparent", hover_color=COR_FUNDO_APP, command=self.alternar_menu
         )
         self.btn_hamburguer.pack(pady=10)
 
         # --- FRAME DO MENU LATERAL (Aberto) ---
         self.frame_menu = ctk.CTkFrame(self, width=220, corner_radius=0, fg_color=COR_MENU)
-        
+
         self.label_logo = ctk.CTkLabel(self.frame_menu, text="Menu Parque", font=ctk.CTkFont(size=20, weight="bold"), text_color="#FFFFFF")
         self.label_logo.pack(pady=(30, 20))
 
@@ -63,14 +63,14 @@ class AppParque(ctk.CTk):
 
         # Botão de Logout fixo em baixo
         self.btn_logout = ctk.CTkButton(
-            self.frame_menu, text="Sair da Sessão", fg_color=COR_VERMELHO, 
+            self.frame_menu, text="Sair da Sessão", fg_color=COR_VERMELHO,
             hover_color=COR_HOVER_VERMELHO, command=self.fazer_logout
         )
         self.btn_logout.pack(side="bottom", pady=30, padx=20)
 
         # --- FRAME PRINCIPAL (Onde as telas aparecem) ---
-        self.frame_principal = ctk.CTkFrame(self, corner_radius=10, fg_color=COR_FUNDO_APP)
-        self.frame_principal.grid(row=0, column=0, columnspan=3, padx=20, pady=20, sticky="nsew")
+        self.frame_principal = ctk.CTkFrame(self, corner_radius=0, fg_color=COR_FUNDO_APP)
+        self.frame_principal.grid(row=0, column=0, columnspan=3, sticky="nsew")
 
         # Inicia o sistema
         self.abrir_tela_login()
@@ -98,8 +98,8 @@ class AppParque(ctk.CTk):
 
     def criar_botao_menu(self, texto, comando):
         btn = ctk.CTkButton(
-            self.frame_botoes, text=texto, fg_color="transparent", 
-            text_color="#FFFFFF", hover_color="#5A52D5", anchor="w", 
+            self.frame_botoes, text=texto, fg_color="transparent",
+            text_color="#FFFFFF", hover_color="#5A52D5", anchor="w",
             command=lambda: comando(btn)
         )
         btn.pack(pady=10, padx=20, fill="x")
@@ -124,8 +124,8 @@ class AppParque(ctk.CTk):
         self.frame_fino.grid_remove()
         self.menu_visivel = False
         self.usuario_logado = None
-        
-        self.frame_principal.grid(row=0, column=0, columnspan=3, padx=20, pady=20, sticky="nsew")
+
+        self.frame_principal.grid(row=0, column=0, columnspan=3, sticky="nsew")
         self.abrir_tela_login()
 
     def liberar_acesso_sistema(self, perfil, cpf=None):
@@ -135,7 +135,7 @@ class AppParque(ctk.CTk):
         self.frame_fino.grid(row=0, column=0, sticky="nsew")
         self.frame_menu.grid(row=0, column=1, sticky="nsew")
         self.menu_visivel = True
-        self.frame_principal.grid(row=0, column=2, padx=20, pady=20, sticky="nsew")
+        self.frame_principal.grid(row=0, column=2, sticky="nsew")
 
         self._construir_menu_dinamico()
 

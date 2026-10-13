@@ -1,5 +1,9 @@
 import customtkinter as ctk
 from src.utils.formatadores import formatar_cpf
+from src.gui.componentes.tema import (
+    COR_BOTAO_ROXO, COR_HOVER_ROXO, COR_FUNDO_APP,
+    COR_ERRO, COR_SUCESSO, carregar_fundo,
+)
 
 
 class TelaLogin(ctk.CTkFrame):
@@ -10,12 +14,14 @@ class TelaLogin(ctk.CTkFrame):
         self.on_login_sucesso = on_login_sucesso
         self.on_ir_para_cadastro = on_ir_para_cadastro
 
-        # Cores
-        COR_BOTAO_ROXO = "#6C63FF"
-        COR_HOVER_ROXO = "#5A52D5"
+        # --- Imagem de fundo ---
+        self._fundo_img = carregar_fundo((900, 600))
+        if self._fundo_img is not None:
+            self._label_fundo = ctk.CTkLabel(self, image=self._fundo_img, text="")
+            self._label_fundo.place(x=0, y=0, relwidth=1, relheight=1)
 
-        # Frame central com visual de cartão
-        self.frame_login = ctk.CTkFrame(self, corner_radius=15)
+        # --- Frame central com visual de cartão ---
+        self.frame_login = ctk.CTkFrame(self, corner_radius=15, fg_color=COR_FUNDO_APP)
         self.frame_login.place(relx=0.5, rely=0.5, anchor="center")
 
         self.lbl_titulo = ctk.CTkLabel(
@@ -38,9 +44,6 @@ class TelaLogin(ctk.CTkFrame):
     # ABA VISITANTE
     # ------------------------------------------------------------------
     def _montar_aba_visitante(self):
-        COR_BOTAO_ROXO = "#6C63FF"
-        COR_HOVER_ROXO = "#5A52D5"
-
         aba = self.tabs.tab("Visitante")
 
         self.entry_cpf = ctk.CTkEntry(aba, placeholder_text="CPF (000.000.000-00)", width=260)
@@ -72,16 +75,17 @@ class TelaLogin(ctk.CTkFrame):
         )
         self.btn_cadastrar.pack(pady=(0, 10))
 
-        self.lbl_msg_visitante = ctk.CTkLabel(aba, text="", text_color="red")
+        self.lbl_msg_visitante = ctk.CTkLabel(
+            aba, text="",
+            text_color=COR_ERRO,
+            fg_color="transparent"
+        )
         self.lbl_msg_visitante.pack(pady=(0, 10))
 
     # ------------------------------------------------------------------
     # ABA ADMIN
     # ------------------------------------------------------------------
     def _montar_aba_admin(self):
-        COR_BOTAO_ROXO = "#6C63FF"
-        COR_HOVER_ROXO = "#5A52D5"
-
         aba = self.tabs.tab("Admin")
 
         self.entry_admin_usuario = ctk.CTkEntry(aba, placeholder_text="Usuário", width=260)
@@ -100,7 +104,11 @@ class TelaLogin(ctk.CTkFrame):
         )
         self.btn_entrar_admin.pack(pady=(15, 10))
 
-        self.lbl_msg_admin = ctk.CTkLabel(aba, text="", text_color="red")
+        self.lbl_msg_admin = ctk.CTkLabel(
+            aba, text="",
+            text_color=COR_ERRO,
+            fg_color="transparent"
+        )
         self.lbl_msg_admin.pack(pady=(0, 10))
 
     # ------------------------------------------------------------------
@@ -132,16 +140,16 @@ class TelaLogin(ctk.CTkFrame):
         senha = self.entry_senha_visitante.get()
 
         if not cpf or not senha:
-            self.lbl_msg_visitante.configure(text="Preencha CPF e senha!", text_color="red")
+            self.lbl_msg_visitante.configure(text="Preencha CPF e senha!", text_color=COR_ERRO)
             return
 
         visitante = self.servico.autenticar_visitante(cpf, senha)
 
         if visitante is None:
-            self.lbl_msg_visitante.configure(text="CPF ou senha incorretos!", text_color="red")
+            self.lbl_msg_visitante.configure(text="CPF ou senha incorretos!", text_color=COR_ERRO)
             return
 
-        self.lbl_msg_visitante.configure(text="Acesso liberado! Entrando...", text_color="green")
+        self.lbl_msg_visitante.configure(text="Acesso liberado! Entrando...", text_color=COR_SUCESSO)
         self.after(500, lambda: self.on_login_sucesso(perfil="visitante", cpf=visitante.cpf))
 
     # ------------------------------------------------------------------
@@ -152,12 +160,12 @@ class TelaLogin(ctk.CTkFrame):
         senha = self.entry_admin_senha.get()
 
         if not usuario or not senha:
-            self.lbl_msg_admin.configure(text="Preencha usuário e senha!", text_color="red")
+            self.lbl_msg_admin.configure(text="Preencha usuário e senha!", text_color=COR_ERRO)
             return
 
         if not self.servico.autenticar_admin(usuario, senha):
-            self.lbl_msg_admin.configure(text="Usuário ou senha incorretos!", text_color="red")
+            self.lbl_msg_admin.configure(text="Usuário ou senha incorretos!", text_color=COR_ERRO)
             return
 
-        self.lbl_msg_admin.configure(text="Acesso liberado! Entrando...", text_color="green")
+        self.lbl_msg_admin.configure(text="Acesso liberado! Entrando...", text_color=COR_SUCESSO)
         self.after(500, lambda: self.on_login_sucesso(perfil="admin", cpf=None))
