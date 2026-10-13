@@ -26,7 +26,7 @@ class TelaLogin(ctk.CTkFrame):
 
         self.lbl_titulo = ctk.CTkLabel(
             self.frame_login,
-            text="Bem-Vindo(a)",
+            text="Bem-Vindo(a) ao Thorpe Park!",
             font=("Arial", 24, "bold")
         )
         self.lbl_titulo.pack(pady=(30, 20), padx=40)
