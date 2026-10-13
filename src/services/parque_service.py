@@ -72,6 +72,10 @@ class ParqueService:
             atual = atual.proximo
         return lista
 
+    def buscar_visitante_por_cpf(self, cpf):
+        """Busca um visitante cadastrado pelo seu CPF."""
+        return self.visitantes.buscar_por("cpf", cpf)
+
     def adicionar_visitante_na_fila(self, cpf, nome_atracao):
         """Valida visitante e atração e adiciona o visitante à fila."""
         visitante_encontrado = self.visitantes.buscar_por("cpf", cpf)
@@ -103,7 +107,10 @@ class ParqueService:
     # --- MÉTODOS DA ISSUE #10 (RESERVAS) ---
 
     def criar_reserva(self, cpf, nome_atracao, horario):
-        """Valida regras de negócio e cria uma nova reserva."""
+        """Valida regras de negócio e cria uma nova reserva.
+
+        Retorna (True, reserva) em caso de sucesso, ou (False, "mensagem").
+        """
         visitante = self.visitantes.buscar_por("cpf", cpf)
         if visitante is None:
             return False, "Visitante não encontrado."
@@ -112,6 +119,7 @@ class ParqueService:
         if atracao is None:
             return False, "Atração não encontrada."
 
+        # Coleta reservas ativas do visitante
         reservas_ativas = []
         atual = self.reservas.inicio
         while atual is not None:
@@ -120,11 +128,8 @@ class ParqueService:
                 reservas_ativas.append(r)
             atual = atual.proximo
 
-        for r in reservas_ativas:
-            if r.horario == horario:
-                return False, "Você já possui uma reserva ativa para este mesmo horário."
-
-        tipo_passe = str(getattr(visitante, 'tipo_passe', 'Normal')).upper()
+        # Regra 1: limite por tipo de passe
+        tipo_passe = str(visitante.tipo_passe).upper()
         if "VIP" in tipo_passe:
             limite = 3
         elif "ANUAL" in tipo_passe:
@@ -133,19 +138,22 @@ class ParqueService:
             limite = 1
 
         if len(reservas_ativas) >= limite:
-            return False, f"Limite de reservas ativas atingido ({limite} para o passe {getattr(visitante, 'tipo_passe', 'Normal')})."
+            return False, f"Limite de reservas ativas atingido ({limite} para o passe {visitante.tipo_passe})."
 
+        # Regra 2: conflito de horário
+        for r in reservas_ativas:
+            if r.horario == horario:
+                return False, "Você já possui uma reserva ativa para este mesmo horário."
+
+        # Cria, armazena na ListaEncadeada e persiste
         nova_reserva = Reserva(cpf_visitante=cpf, nome_atracao=atracao.nome, horario=horario)
         self.reservas.inserir(nova_reserva)
         db.salvar_reserva(nova_reserva)
 
-        if hasattr(atracao, 'fila_virtual'):
-            atracao.fila_virtual.enfileirar(visitante, atracao.aceita_prioridade)
-
         return True, nova_reserva
 
     def listar_reservas_do_visitante(self, cpf):
-        """Retorna a lista de reservas atreladas ao CPF informado."""
+        """Retorna as reservas de um visitante específico."""
         lista = []
         atual = self.reservas.inicio
         while atual is not None:
@@ -155,7 +163,10 @@ class ParqueService:
         return lista
 
     def cancelar_reserva(self, codigo, e_visitante=True):
-        """Cancela uma reserva existente e atualiza o banco de dados."""
+        """Cancela uma reserva existente e atualiza o banco.
+
+        Retorna (True, "mensagem") em caso de sucesso, ou (False, "mensagem").
+        """
         if not e_visitante:
             return False, "Apenas o visitante pode cancelar suas próprias reservas."
 
@@ -172,7 +183,7 @@ class ParqueService:
         return True, "Reserva cancelada com sucesso."
 
     def listar_reservas(self):
-        """Retorna todas as reservas registradas no sistema (para uso do painel admin)."""
+        """Retorna todas as reservas registradas (para uso do painel admin)."""
         lista = []
         atual = self.reservas.inicio
         while atual is not None:
